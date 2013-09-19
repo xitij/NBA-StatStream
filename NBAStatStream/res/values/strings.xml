@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">NBAStatStream</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="app_welcome">Welcome to NBA Stat Stream</string>
+    <string name="live_game_label">Live Games</string>
+    <string name="archived_game_label">Archived Games</string>
+    <string name="debuggable_string">true</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="diag_frag_boxscore_title">Enter an ESPN NBA box score</string>
+    <string name="hint_espn_boxscore">ESPN box score address</string>
+    <string name="edit_box_score_button">Edit</string>
+    <string name="empty_box_score">empty box score</string>
+    <string name="pager_4factors_title">4 Factors</string>
+    <string name="pager_advbox_title">Advanced Box Score</string>
+    <string name="pager_shotchart_title">Shot Chart</string>
+    <string name="title_pace">Pace</string>
+    <string name="title_eff">Eff</string>
+    <string name="title_efg">eFG %</string>
+    <string name="title_ftfg">FT/FG</string>
+    <string name="title_oreb">OReb %</string>
+    <string name="title_tor">TO Rate</string>
+    <string name="team_name1">MIA</string>
+    <string name="team_name2">IND</string>
+    
+
+</resources>

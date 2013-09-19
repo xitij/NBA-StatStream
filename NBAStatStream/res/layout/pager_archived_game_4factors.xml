@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:title="@string/pager_4factors_title" >
+
+    <LinearLayout
+        android:id="@+id/team1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="50.0dp"
+        android:layout_marginTop="50.0dp"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/logo1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:contentDescription="ImageView"
+            android:maxHeight="125.0dp"
+            android:maxWidth="125.0dp"
+            android:src="@drawable/miami_heat_logo" />
+
+        <TextView
+            android:id="@+id/score1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="100"
+            android:textSize="25.0dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/team2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="50.0dp"
+        android:layout_marginTop="50.0dp"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/logo2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:contentDescription="ImageView"
+            android:maxHeight="125.0dp"
+            android:maxWidth="125.0dp"
+            android:src="@drawable/indiana_pacers_logo" />
+
+        <TextView
+            android:id="@+id/score2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="99"
+            android:textSize="25.0dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/table_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/team1"
+        android:layout_centerHorizontal="true"
+        android:text="@string/pager_4factors_title"
+        android:textSize="50.0sp" />
+
+    <TableLayout
+        android:id="@+id/four_factors_table"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/table_title"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15.0dp" >
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/title_pace"
+                android:layout_column="1"
+                android:padding="3dp"
+                android:text="@string/title_pace"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/title_eff"
+                android:padding="3dp"
+                android:text="@string/title_eff"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/title_efg"
+                android:padding="3dp"
+                android:text="@string/title_efg"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/title_ftfg"
+                android:padding="3dp"
+                android:text="@string/title_ftfg"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/title_oreb"
+                android:padding="3dp"
+                android:text="@string/title_oreb"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/title_tor"
+                android:padding="3dp"
+                android:text="@string/title_tor"
+                android:textSize="15.0sp" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/team_name1"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="@string/team_name1"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/game_pace"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="88.0"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/team1_eff"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="101.3"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/team1_efg"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="45.6%"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/team1_ftfg"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="44.1"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/team1_oreb"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="36.4%"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/team1_tor"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="13.2"
+                android:textSize="15.0sp" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/team_name2"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="@string/team_name2"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/team2_eff"
+                android:layout_column="2"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="94.3"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/team2_efg"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="39.7%"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/team2_ftfg"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="20.3"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/team2_oreb"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="28.9%"
+                android:textSize="15.0sp" />
+
+            <TextView
+                android:id="@+id/team2_tor"
+                android:gravity="center_horizontal"
+                android:padding="3dp"
+                android:text="23.6"
+                android:textSize="15.0sp" />
+        </TableRow>
+    </TableLayout>
+
+</RelativeLayout>
