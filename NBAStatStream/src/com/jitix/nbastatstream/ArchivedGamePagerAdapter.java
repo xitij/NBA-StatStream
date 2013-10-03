@@ -1,5 +1,6 @@
 package com.jitix.nbastatstream;
 
+import java.util.Vector;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -9,7 +10,8 @@ import android.util.Log;
 public class ArchivedGamePagerAdapter extends FragmentPagerAdapter {
 
 	private static final String TAG = "NBAStatStream";
-	private static int size;
+	
+	Vector<Fragment> myFragments = new Vector<Fragment>(); 
 	
 	public ArchivedGamePagerAdapter(FragmentManager fm) {
 		super(fm);
@@ -17,18 +19,28 @@ public class ArchivedGamePagerAdapter extends FragmentPagerAdapter {
 
 	@Override
 	public Fragment getItem(int i) {
-		Fragment fragment = new ArchivedGameFragment();
-		Bundle args = new Bundle();
-		size++;
-		Log.d(TAG, "Fragment getItem i = " + i + " size = " + size);
-		args.putInt(ArchivedGameFragment.PAGE_NUM, i);
-		fragment.setArguments(args);
+		
+		Fragment fragment = ArchivedGameFragment.newInstance(i);
+		Log.d(TAG, "Fragment getItem i = " + i);
+		
+		myFragments.add(fragment);
+		Log.d(TAG, "Placing the Fragment in the Vector at index = " + i + ", vector.size() = " + myFragments.size());
+		
 		return fragment;
 	}
 
 	@Override
 	public int getCount() {
 		return 3;
+	}
+	
+	public Fragment getFrag(int index) {
+		try {
+			return myFragments.get(index);
+		} catch(Exception e) {
+			Log.d(TAG, "Error getting Frag with index = " + index + ". Exception thrown, exception = " + e);
+			return null;
+		}
 	}
 	
 }
