@@ -49,7 +49,8 @@ public class ArchivedGame extends FragmentActivity implements OnClickListener, E
 	ArchivedGameDialog archived_game_dialog = new ArchivedGameDialog();
 
 	//
-	// onCreate: Sets the view, show the Dialog, tie up views and buttons
+	// onCreate: Sets the view, show the Dialog, tie up views and buttons.
+	//	Also sets up the ViewPage and PageAdapter, and creates and setup ActionBar.
 	//
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -118,94 +119,16 @@ public class ArchivedGame extends FragmentActivity implements OnClickListener, E
 							: (i == 1) ? R.string.pager_advbox_title : R.string.pager_shotchart_title));
 
 		}
-		
-		// Add a Tag to each ArchivedGame Fragment so we can find them later
-		//android.support.v4.app.FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-		//trans.add(R.id.pager, archivedGamePagerAdapter.getItem(0), "fourFactors");
-		
 	}
 
 	//
-	// onStart: Sets up the ViewPage and PageAdapter, create and setup ActionBar
+	// onStart
 	//
 	@Override
 	protected void onStart() {
 		super.onStart();
 	}
 
-	/**
-	 * BoxScoreDownloader:
-	 * 	Is a class that extends the AsyncTask. It attempts to make a http
-	 * 	connection to the URL the users provided. It will print an error
-	 * 	if the URL is invalid, otherwise it will use the BasketballParser
-	 * 	class to parse the data into a BasketballGame object and return it
-	 * 	to the calling Activity.
-	 */
-	/*
-	private class BoxScoreDownloader extends AsyncTask<String, Void, BasketballGame> {
-
-		// BasketballGame object to return
-		BasketballGame parsedGame;
-		
-		// GameParser object
-		private GameParser gameParser;
-		
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			parsedGame = new BasketballGame();
-			gameParser = new GameParser();
-		}
-
-		@Override
-		protected BasketballGame doInBackground(String... params) {
-
-			// Get the string URL
-			String url = params[0];
-			
-			// Attempt to connect to the URL and get the HTML
-			try 
-			{
-				// Connect and get the HTML
-				parsedGame = gameParser.connectAndGet(url);
-			}
-			catch (MalformedURLException e) {
-				Log.d(TAG, "malformed URL, not a http");
-				return null;
-			}
-			catch (HttpStatusException e) {
-				Log.d(TAG, "http response not OK and response error not ignored");
-				return null;
-			}
-			catch (UnsupportedMimeTypeException e) {
-				Log.d(TAG, "Response mime type is not supported");
-				return null;
-			}
-			catch (SocketTimeoutException e ) {
-				Log.d(TAG,  "Connection timed out");
-				return null;
-			}
-			catch (IOException e) {
-				Log.d(TAG, "IOException Error getting HTML file");
-				return null;
-			}
-			catch (Exception e) {
-				Log.d(TAG, "Exception thrown = " + e);
-				return null;
-			}
-			return parsedGame;
-		}
-		
-		@Override
-		protected void onPostExecute(BasketballGame result) {
-			super.onPostExecute(result);
-			
-			// Set the Basketball for the parent class
-			ArchivedGame.myGame = result;
-			Log.d(ArchivedGame.TAG, "Done connecting and parsing the Game");
-		}
-	}*/
-	
 	//
 	// onClick: Opens the Dialog if the user clicked on the edit button.
 	//
