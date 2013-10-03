@@ -143,8 +143,8 @@ public class GameParser {
 		
 		// Set the team names
 		String gameTitle = gameDocument.title().toString();
-		BasketballGame.AwayTeam = gameTitle.substring(0, gameTitle.indexOf("vs.") - 1);
-		BasketballGame.HomeTeam = gameTitle.substring(gameTitle.indexOf("vs.") + 4, gameTitle.indexOf("-") - 1);
+		parsedGame.AwayTeam = gameTitle.substring(0, gameTitle.indexOf("vs.") - 1);
+		parsedGame.HomeTeam = gameTitle.substring(gameTitle.indexOf("vs.") + 4, gameTitle.indexOf("-") - 1);
 		
 		// Determine if the game went to OT and set the amount it so
 		Elements gameState = myDoc.body().getElementsByClass("game-state");
