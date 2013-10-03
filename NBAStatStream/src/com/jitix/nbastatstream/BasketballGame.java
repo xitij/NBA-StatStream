@@ -20,9 +20,9 @@ public class BasketballGame {
 	
 	private static final String TAG = "NBAStatStream";
 	
-	static String HomeTeam;
-	static String AwayTeam;
-	static int OT;
+	String HomeTeam;
+	String AwayTeam;
+	int OT;
 	
 	// Object to hold the standard stats for each player
 	class BoxScoreLine {
