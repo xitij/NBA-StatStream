@@ -239,30 +239,8 @@ public class GameParser {
 		}
 		Log.d(TAG, "# of players parsed = " + (parsedGame.AwayTeamBox.size() + parsedGame.HomeTeamBox.size()));
 		
-		// Away Team Bench Players: tbody == 3
-		/*for(Element row : boxscore.select("table > tbody:eq(3) > tr")) {
-			// Get the player name
-			String[] boxLine = row.text().split(",");
-			String playerName = boxLine[0];
-			String[] playerLine = boxLine[1].trim().split(" ");
-			// Parse the player line string into the BasketballGame object
-			BasketballGame.BoxScoreLine playerBox = parsePlayerBoxScore(playerLine);
-			// Insert the bench player into the AwayTeamBox
-			parsedGame.AwayTeamBox.put(playerName, playerBox);
-		}
-		Log.d(TAG, "# of players parsed (total) = " + parsedGame.AwayTeamBox.size());*/
-		
-		// Away Team Totals: tbody == 5
 		// Calculate the total team stats
 		parsedGame.calculateTeamTotals();
-		
-		parsedGame.printPlayerBoxScoreLine("Paul George", true);
-		parsedGame.printTeamStats(BasketballGame.AwayTeam);
-		parsedGame.printTeamAdvStats(BasketballGame.AwayTeam);
-		parsedGame.printPlayerBoxScoreLine("LeBron James", false);
-		parsedGame.printPlayerBoxScoreLine("Shane Battier", false);
-		parsedGame.printTeamStats(BasketballGame.HomeTeam);
-		parsedGame.printTeamAdvStats(BasketballGame.HomeTeam);
 	}
 
 	private void parsePlaybyPlay(Document myDoc) {
