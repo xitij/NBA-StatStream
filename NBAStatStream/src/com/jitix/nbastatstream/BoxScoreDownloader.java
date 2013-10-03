@@ -47,26 +47,6 @@ public class BoxScoreDownloader extends AsyncTask<String, Void, BasketballGame> 
 			// Connect and get the HTML
 			parsedGame = gameParser.connectAndGet(url);
 		}
-		/*catch (MalformedURLException e) {
-			Log.d(TAG, "malformed URL, not a http");
-			return null;
-		}
-		catch (HttpStatusException e) {
-			Log.d(TAG, "http response not OK and response error not ignored");
-			return null;
-		}
-		catch (UnsupportedMimeTypeException e) {
-			Log.d(TAG, "Response mime type is not supported");
-			return null;
-		}
-		catch (SocketTimeoutException e ) {
-			Log.d(TAG,  "Connection timed out");
-			return null;
-		}
-		catch (IOException e) {
-			Log.d(TAG, "IOException Error getting HTML file");
-			return null;
-		}*/
 		catch (Exception e) {
 			Log.d(TAG, "Exception thrown = " + e);
 			return null;
@@ -78,7 +58,6 @@ public class BoxScoreDownloader extends AsyncTask<String, Void, BasketballGame> 
 	protected void onPostExecute(BasketballGame result) {
 		super.onPostExecute(result);
 		
-		// Set the Basketball for the parent class
 		// Call the TaskListener finished function
 		Log.d(TAG, "Done connecting and parsing the Game");
 		listener.onTaskFinished(result);
