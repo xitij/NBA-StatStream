@@ -154,8 +154,7 @@ public class BasketballGame {
 		insertAwayTeamStats(stats);
 		
 		// Calculate the team advanced stats and put them in the map
-		float[] advstats = new float[11];
-		advstats = calculateTeamAdvStats(home_it, away_it);
+		calculateTeamAdvStats(home_it, away_it);
 	}
 	
 	//
@@ -198,11 +197,8 @@ public class BasketballGame {
 		return teamstats;
 	}
 	
-	private float[] calculateTeamAdvStats(Iterator<Map.Entry<String, BoxScoreLine>> home_it, 
+	private void calculateTeamAdvStats(Iterator<Map.Entry<String, BoxScoreLine>> home_it, 
 										  Iterator<Map.Entry<String, BoxScoreLine>> away_it) {
-		// Object to return
-		float[] advstats = new float[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		
 		
 		// Calculate possession and pace: please see basketball-reference.com for an
 		// explanation of this calculation: www.basketball-reference.com/about/glossary.html
@@ -216,6 +212,7 @@ public class BasketballGame {
 							  - 1.07f * (AwayTeamStats.get(StatName.OFFREB) / (AwayTeamStats.get(StatName.OFFREB) + HomeTeamStats.get(StatName.DEFREB)))
 							  * (AwayTeamStats.get(StatName.FGA) - AwayTeamStats.get(StatName.FG)) + AwayTeamStats.get(StatName.TURNOVERS))
 						    );
+		poss = precision(1, poss);
 		HomeTeamAdvStats.put(AdvancedStatName.POSS, poss);
 		AwayTeamAdvStats.put(AdvancedStatName.POSS, poss);
 		float possA = HomeTeamStats.get(StatName.FGA) + HomeTeamStats.get(StatName.TURNOVERS) + 
@@ -226,16 +223,15 @@ public class BasketballGame {
 		Log.d(TAG, "poss(ref) = " + poss + ", poss (.4 avg) = " + poss2 + ", possA = " + possA + ", possB = " + possB);
 		float minsTotal = 48 + (OT * 5);
 		float pace = 48 * poss / minsTotal ;
+		pace = precision(1, pace);
 		HomeTeamAdvStats.put(AdvancedStatName.PACE, pace);
 		AwayTeamAdvStats.put(AdvancedStatName.PACE, pace);
 		
 		// Calculate the Offensive and Defensive Efficiency
 		float homeOffEff = HomeTeamStats.get(StatName.POINTS) * 100 / poss;
 		float homeDefEff = AwayTeamStats.get(StatName.POINTS) * 100 / poss;
-		Log.d(TAG, "offEff = " + homeOffEff + ", defEff = " + homeDefEff);
 		homeOffEff = precision(1, homeOffEff);
 		homeDefEff = precision(1, homeDefEff);
-		Log.d(TAG, "After round offEff = " + homeOffEff + ", defEff = " + homeDefEff);
 		HomeTeamAdvStats.put(AdvancedStatName.OFFEFF, homeOffEff);
 		HomeTeamAdvStats.put(AdvancedStatName.DEFEFF, homeDefEff);
 		AwayTeamAdvStats.put(AdvancedStatName.DEFEFF, homeOffEff);
@@ -244,9 +240,11 @@ public class BasketballGame {
 		// Calculate the 4 Factors
 		// Calculate eFG%
 		float eFGpercent = (HomeTeamStats.get(StatName.FG) + 0.5f *HomeTeamStats.get(StatName.THREEP)) / HomeTeamStats.get(StatName.FGA);
+		eFGpercent = precision(3, eFGpercent);
 		HomeTeamAdvStats.put(AdvancedStatName.EFGPERCENT, eFGpercent);
 		AwayTeamAdvStats.put(AdvancedStatName.DEFEFGPERCENT, eFGpercent);
 		eFGpercent = (AwayTeamStats.get(StatName.FG) + 0.5f *AwayTeamStats.get(StatName.THREEP)) / AwayTeamStats.get(StatName.FGA);
+		eFGpercent = precision(3, eFGpercent);
 		AwayTeamAdvStats.put(AdvancedStatName.EFGPERCENT, eFGpercent);
 		HomeTeamAdvStats.put(AdvancedStatName.DEFEFGPERCENT, eFGpercent);
 		
@@ -254,32 +252,36 @@ public class BasketballGame {
 		// TODO: Check TOV%: possession vs bball-ref formula
 		float tovpercent = 100 * HomeTeamStats.get(StatName.TURNOVERS) / 
 					            (HomeTeamStats.get(StatName.FGA) + 0.44f * HomeTeamStats.get(StatName.FTA) + HomeTeamStats.get(StatName.TURNOVERS));
+		tovpercent = precision(1, tovpercent);
 		HomeTeamAdvStats.put(AdvancedStatName.TOPERCENT, tovpercent);
 		AwayTeamAdvStats.put(AdvancedStatName.DEFTOPERCENT, tovpercent);
 		tovpercent = AwayTeamStats.get(StatName.TURNOVERS) * 100 / 
 			       (AwayTeamStats.get(StatName.FGA) + 0.44f * AwayTeamStats.get(StatName.FTA) + AwayTeamStats.get(StatName.TURNOVERS));
+		tovpercent = precision(1, tovpercent);
 		AwayTeamAdvStats.put(AdvancedStatName.TOPERCENT, tovpercent);
 		HomeTeamAdvStats.put(AdvancedStatName.DEFTOPERCENT, tovpercent);
 		
 		// Calculate Offensive Rebounds %
 		float offrebpercent = 100 * HomeTeamStats.get(StatName.OFFREB) / 
 								    (HomeTeamStats.get(StatName.OFFREB) + AwayTeamStats.get(StatName.DEFREB));
+		offrebpercent = precision(1, offrebpercent);
 		HomeTeamAdvStats.put(AdvancedStatName.OREBPERCENT, offrebpercent);
 		AwayTeamAdvStats.put(AdvancedStatName.DREBPERCENT, offrebpercent);
 		offrebpercent = 100 * AwayTeamStats.get(StatName.OFFREB) /
 						      (AwayTeamStats.get(StatName.OFFREB) + HomeTeamStats.get(StatName.DEFREB));
+		offrebpercent = precision(1, offrebpercent);
 		AwayTeamAdvStats.put(AdvancedStatName.OREBPERCENT, offrebpercent);
 		HomeTeamAdvStats.put(AdvancedStatName.DREBPERCENT, offrebpercent);
 		
 		// Calculate FT per FG Attempted
 		float ftfga = 100 * HomeTeamStats.get(StatName.FT) / HomeTeamStats.get(StatName.FGA);
+		ftfga = precision(1, ftfga);
 		HomeTeamAdvStats.put(AdvancedStatName.FTFGA, ftfga);
 		AwayTeamAdvStats.put(AdvancedStatName.DEFFTFGA, ftfga);
 		ftfga = 100 * AwayTeamStats.get(StatName.FT) / AwayTeamStats.get(StatName.FGA);
+		ftfga = precision(1, ftfga);
 		AwayTeamAdvStats.put(AdvancedStatName.FTFGA, ftfga);
 		HomeTeamAdvStats.put(AdvancedStatName.DEFFTFGA, ftfga);
-		
-		return advstats;
 	}
 	
 	private void insertHomeTeamStats(float[] myStats) {
