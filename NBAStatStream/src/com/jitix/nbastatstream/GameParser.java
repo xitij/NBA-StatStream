@@ -198,9 +198,7 @@ public class GameParser {
 			// Parse the totals
 			else {
 				for(Element row : boxscore.select("table > tbody:eq("+ tbody + ") > tr:eq(2) > td > div:eq(0)")) {
-					//Log.d(TAG, "total line row = " + row.text());
 					String[] totalrow = row.text().split(":");
-					//Log.d(TAG, "totalrow[0] = " + totalrow[0] + ", [1] = " + totalrow[1] + ", [2] = " + totalrow[2] + ", [3] = " + totalrow[3]);
 					
 					String fbp = totalrow[1].split("P")[0];
 					// replace the &nbsp with nothing so we can parse
@@ -228,7 +226,6 @@ public class GameParser {
 					}
 					
 					String pot = totalrow[3].split("\\(")[1].substring(0, totalrow[3].split("\\(")[1].length()-1);
-					Log.d(TAG, "pot = " + pot);
 					if(tbody == 5) {
 						parsedGame.AwayTeamStats.put(BasketballGame.StatName.POINTSOFFTURNOVERS, Float.parseFloat(pot));
 					} else {
@@ -239,8 +236,9 @@ public class GameParser {
 		}
 		Log.d(TAG, "# of players parsed = " + (parsedGame.AwayTeamBox.size() + parsedGame.HomeTeamBox.size()));
 		
-		// Calculate the total team stats
+		// Calculate the total team stats and player advanced stats
 		parsedGame.calculateTeamTotals();
+		parsedGame.calculatePlayerAdvStats();
 	}
 
 	private void parsePlaybyPlay(Document myDoc) {
