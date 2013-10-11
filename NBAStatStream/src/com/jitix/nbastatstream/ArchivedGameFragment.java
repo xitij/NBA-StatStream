@@ -1,30 +1,29 @@
 package com.jitix.nbastatstream;
 
+import java.util.Vector;
 import com.jitix.nbastatstream.BasketballGame.AdvancedStatName;
 import com.jitix.nbastatstream.BasketballGame.StatName;
 import com.jitix.nbastatstream.NBAStatStream.TeamInfo;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.webkit.WebView.FindListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ArchivedGameFragment extends Fragment {
+public class ArchivedGameFragment extends Fragment implements OnClickListener {
 
 	private static final String TAG = "NBAStatStream";
 	public static final String PAGE_NUM = "page_number";
-	public static final String UPDATE_VIEWS = "update_views";
 	static final int FOUR_FACTORS = 0;
 	static final int BOX_SCORE = 1;
 	static final int SHOT_CHART = 2;
 	
-	private float HomeScore;
-	private float AwayScore;
+	Vector<Fragment> myAdvBoxFragments = new Vector<Fragment>();
 	
 	//
 	// newInstance: Returns an instance of the ArchivedGameFragment. Takes i (page_num)
@@ -55,7 +54,9 @@ public class ArchivedGameFragment extends Fragment {
 			myView = inflater.inflate(R.layout.pager_archived_game_4factors, container, false);
 			break;
 		case BOX_SCORE:
-			myView = inflater.inflate(R.layout.pager_archived_game_adv_box, container, false);
+			createAdvBoxScoreFrags();
+			myView = inflater.inflate(R.layout.pager_archived_game_adv_box_frame, container, false);
+			connectTeamButtons(myView);
 			break;
 		case SHOT_CHART:
 			myView = inflater.inflate(R.layout.pager_archived_game_shotchart, container, false);
@@ -66,6 +67,72 @@ public class ArchivedGameFragment extends Fragment {
 		}
 
 		return myView;
+	}
+	
+	@Override
+	public void onClick(View v) {
+		Fragment myFrag;
+		switch (v.getId()) {
+		case R.id.adv_box_away_team_button:
+			Log.d(TAG, "clicked on Away Team Button");
+			myFrag = getAdvBoxFrag(0);
+			switchAdvBoxScoreFrag(myFrag);
+			break;
+		case R.id.adv_box_home_team_button:
+			Log.d(TAG, "clicked on Home Team Button");
+			myFrag = getAdvBoxFrag(1);
+			switchAdvBoxScoreFrag(myFrag);
+			break;
+		default:
+			// Do Nothing
+			break;
+		}
+	}
+	
+	private void connectTeamButtons(View myView) {
+		View away_button = myView.findViewById(R.id.adv_box_away_team_button);
+		away_button.setOnClickListener(this);
+		View home_button = myView.findViewById(R.id.adv_box_home_team_button);
+		home_button.setOnClickListener(this);
+	}
+	
+	private void createAdvBoxScoreFrags() {
+		
+		Log.d(TAG, "createAdvBoxScoreFrags");
+		
+		// Create AdvancedBoxScoreFragments for home and away teams
+		AdvancedBoxScoreFragment AwayAdvBoxScoreFrag = AdvancedBoxScoreFragment.newInstance(0);
+		AdvancedBoxScoreFragment HomeAdvBoxScoreFrag = AdvancedBoxScoreFragment.newInstance(1);
+		// Add them both to the vector for storage
+		myAdvBoxFragments.add(AwayAdvBoxScoreFrag);
+		myAdvBoxFragments.add(HomeAdvBoxScoreFrag);
+		
+		// Get the ChildFragmentManager and add the AdvancedBoxScoreFragments to it
+		FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+		transaction.add(R.id.adv_box_frag_container, AwayAdvBoxScoreFrag, "AwayTeamTag").commit();
+	}
+	
+	private void switchAdvBoxScoreFrag(Fragment myFrag) {
+		Log.d(TAG, "Switch Advanced Box Score Fragment called");
+		
+		if(myFrag.isVisible()) {
+			Log.d(TAG, "Fragment already visible so doing nothing...");
+		} else {
+			Log.d(TAG, "Replacing the old fragment");
+			FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+			transaction.replace(R.id.adv_box_frag_container, myFrag);
+			transaction.addToBackStack(null);
+			transaction.commit();
+		}
+	}
+	
+	private Fragment getAdvBoxFrag(int index) { 
+		try {
+			return myAdvBoxFragments.get(index);
+		} catch(Exception e) {
+			Log.d(TAG, "Error getting Advanced Box Frag with index = " + index + ". Exception thrown, exception = " + e);
+			return null;
+		}
 	}
 	
 	public void update4Factors(BasketballGame myGame) {
@@ -119,5 +186,40 @@ public class ArchivedGameFragment extends Fragment {
 		homeTO.setText(Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.TOPERCENT)));
 		TextView awayTO = (TextView)getView().findViewById(R.id.away_tor);
 		awayTO.setText(Float.toString(myGame.AwayTeamAdvStats.get(AdvancedStatName.TOPERCENT)));
+	}
+
+	public void updateAdvBox(BasketballGame myGame) {
+		// Update the view with the data in the BasketballGame object
+		Bundle args = getArguments();
+		Log.d(TAG, "inside updateAdvBox Page num = " + args.getInt(PAGE_NUM));
+		
+		// Check the Away Team Box
+		AdvancedBoxScoreFragment BoxFrag = (AdvancedBoxScoreFragment) getAdvBoxFrag(0);
+		if(BoxFrag.isVisible()) {
+			Log.d(TAG, "Away Box is visible updating it's view");
+			BoxFrag.updateAdvBoxScoreView(myGame, false);
+		} else {
+			// Queue an update when it's visible
+			BoxFrag.queueUpdate(myGame);
+		}
+		
+		// Check the Home Team Box
+		BoxFrag = (AdvancedBoxScoreFragment) getAdvBoxFrag(1);
+		if(BoxFrag.isVisible()) {
+			Log.d(TAG, "Home Box is visible updating it's view");
+			BoxFrag.updateAdvBoxScoreView(myGame, true);
+		} else {
+			// Queue an update when it's visible
+			BoxFrag.queueUpdate(myGame);
+		}
+	}
+	
+	public void updateShotChart(BasketballGame myGame) {
+		// Update the view with the data in the BasketballGame object
+		Bundle args = getArguments();
+		Log.d(TAG, "inside updateShotChart Page num = " + args.getInt(PAGE_NUM));
+		
+		TextView tmpText = (TextView)getView().findViewById(R.id.shotchart_test);
+		tmpText.setText("Updating this page");
 	}
 }
