@@ -1,11 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/adv_box_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
-    
-    <TextView
-        android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical" >
+
+    <LinearLayout
+        android:id="@+id/adv_box_tables"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TESTING FOR NEW WORKSPACE" />
-    
-</RelativeLayout>
+        android:orientation="horizontal" >
+
+        <TableLayout
+            android:id="@+id/adv_box_table_players"
+            android:background="@color/BLACK"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight=".5" >
+            
+            <TableRow 
+                android:id="@+id/adv_box_table_players_title"
+                android:layout_margin="1dp"
+                android:layout_weight="1">
+                <TextView
+                    android:id="@+id/adv_box_table_players_title_team"
+                    android:background="@color/WHITE"
+                    android:layout_margin="1dp"
+                    android:padding="5dp"
+                    android:layout_weight=".85" />
+                <TextView
+                    android:id="@+id/adv_box_table_players_title_pos"
+                    android:background="@color/WHITE"
+                    android:layout_margin="1dp"
+                    android:padding="5dp"
+                    android:text="POS"
+                    android:layout_weight=".15" />
+            </TableRow>
+        </TableLayout>
+
+        <HorizontalScrollView
+            android:id="@+id/adv_box_table_stats_scroll"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight=".5"
+            android:scrollbars="horizontal" >
+
+            <TableLayout
+                android:id="@+id/adv_box_table_stats"
+                android:background="@color/BLACK"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" >
+
+                <TableRow 
+                    android:id="@+id/adv_box_table_stats_names"
+                    android:layout_margin="1dp"
+                    android:layout_weight="13">
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_mins"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="MIN" />
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_tsp"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="TS%" />
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_efg"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="eFG%" />
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_orbp"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="ORB%" />
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_drbp"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="DRB%" />
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_trbp"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="TRB%" />
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_astp"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="AST%" />
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_stlp"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="STL%" />
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_blkp"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="BLK%" />
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_tovp"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="TOV%" />
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_usage"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="Usage" />
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_offrate"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="ORtg" />
+                    <TextView 
+                        android:id="@+id/adv_box_table_stats_name_defrate"
+                        android:layout_weight="1"
+                        android:background="@color/WHITE"
+                    	android:layout_margin="1dp"
+                        android:padding="5dp"
+                        android:text="DRtg" />
+                </TableRow>
+            </TableLayout>
+        </HorizontalScrollView>
+
+    </LinearLayout>
+
+</ScrollView>
