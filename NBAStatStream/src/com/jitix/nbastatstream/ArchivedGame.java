@@ -184,7 +184,28 @@ public class ArchivedGame extends FragmentActivity implements OnClickListener, E
 		
 		myGame = result;
 		
-		ArchivedGameFragment newfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(0);
-		newfrag.update4Factors(this.myGame);
+		// Print the results for debugging...
+		//myGame.printTeamStats(myGame.HomeTeam);
+		//myGame.printTeamStats(myGame.AwayTeam);
+		//myGame.printTeamAdvStats(myGame.HomeTeam);
+		//myGame.printTeamAdvStats(myGame.AwayTeam);
+		//myGame.printPlayerBoxScoreLine("LeBron James", false);
+		//myGame.printPlayerBoxScoreLine("Shane Battier", false);
+		//myGame.printPlayerBoxScoreLine("Paul George", true);
+		//myGame.printPlayerBoxScoreLine("Gerald Green", true);
+		myGame.printPlayerAdvBoxScoreLine("LeBron James", false);
+		myGame.printPlayerAdvBoxScoreLine("Shane Battier", false);
+		myGame.printPlayerAdvBoxScoreLine("Paul George", true);
+		myGame.printPlayerAdvBoxScoreLine("Gerald Green", true);
+		
+		// Update the 4 Factors Fragment
+		ArchivedGameFragment fourFactorfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(0);
+		fourFactorfrag.update4Factors(this.myGame);
+		// Update the Advanced Box Score Fragment
+		ArchivedGameFragment advBoxfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(1);
+		advBoxfrag.updateAdvBox(this.myGame);
+		// Update the Shot Chart Fragment
+		ArchivedGameFragment shotfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(2);
+		shotfrag.updateShotChart(this.myGame);
 	}
 }
