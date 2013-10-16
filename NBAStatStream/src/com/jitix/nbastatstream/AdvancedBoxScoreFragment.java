@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.jitix.nbastatstream.BasketballGame.BoxScoreLine;
+import com.jitix.nbastatstream.NBAStatStream.TeamInfo;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -108,30 +109,53 @@ public class AdvancedBoxScoreFragment extends Fragment {
 		// Get the screen scaling so we can convert px to dp
 		final float scale = getActivity().getBaseContext().getResources().getDisplayMetrics().density;
 		
-		// Get the tables
+		// Get the tables and Views
 		TableLayout advBoxTablePlayers = (TableLayout)myView.findViewById(R.id.adv_box_table_players);
 		TableLayout advBoxTableStats = (TableLayout)myView.findViewById(R.id.adv_box_table_stats);
-		
-		// Add the Team Name and Position titles to the first row
 		TextView titleTeam = (TextView)myView.findViewById(R.id.adv_box_table_players_title_team);
+		TableRow playerTitle = (TableRow)myView.findViewById(R.id.adv_box_table_players_title);
+		TableRow statsTitle = (TableRow)myView.findViewById(R.id.adv_box_table_stats_names);
+		
+		// Get the TeamInfo
+		TeamInfo teamInfo;
 		
 		// Set the Team Name and get the Proper iterator for the AdvancedBoxScore
 		Iterator<Map.Entry<String, BoxScoreLine>> it;
 		if(home == true) {
+			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam);
 			titleTeam.setText(myGame.HomeTeam);
 			it = myGame.HomeTeamBox.entrySet().iterator();
 		} else {
+			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam);
 			titleTeam.setText(myGame.AwayTeam);
 			it = myGame.AwayTeamBox.entrySet().iterator();
 		}
+		titleTeam.setTextColor(getResources().getColor(R.color.WHITE));
 		
+		// Set the Background color of the title row
+		for(int i = 0; i < playerTitle.getChildCount(); i++) {
+			View v = playerTitle.getChildAt(i);
+			v.setBackgroundColor(getResources().getColor(teamInfo.color_main));
+		}
+		for(int i = 0; i < statsTitle.getChildCount(); i++) {
+			View v = statsTitle.getChildAt(i);
+			v.setBackgroundColor(getResources().getColor(teamInfo.color_main));
+		}
+		
+		int i = 0;
 		while(it.hasNext()) {
 			Entry<String, BoxScoreLine> pair = it.next();
 			String name = pair.getKey();
 			BasketballGame.BoxScoreLine box = pair.getValue();
 			
+			// Get the row color (alternating)
+			int rowColor;
+			if(i % 2 == 0) { rowColor = getResources().getColor(R.color.ROW_LIGHT_GRAY); }
+			else { rowColor = getResources().getColor(R.color.ROW_GRAY); }
+			
 			// Only create a row for the player if he actually played
 			if(box.Minutes != 0) {
+				i++;
 				// Get the advanced box score line
 				BasketballGame.AdvancedBoxScoreLine  advbox;
 				if(home == true) {
@@ -142,7 +166,7 @@ public class AdvancedBoxScoreFragment extends Fragment {
 				
 				// Create a TableRow and TextView for the Player side of the Table
 				TableRow.LayoutParams nameParams = new TableRow.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, .85f);
-				int pixels = (int) (1 * scale + 0.5f);
+				int pixels = (int) (0.5f * scale + 0.5f);
 				nameParams.setMargins(pixels, pixels, pixels, pixels);
 				TableRow.LayoutParams posParams = new TableRow.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, .15f);
 				posParams.setMargins(pixels, pixels, pixels, pixels);
@@ -153,13 +177,13 @@ public class AdvancedBoxScoreFragment extends Fragment {
 				// Player Name Text
 				playerName.setText(name);
 				playerName.setLayoutParams(nameParams);
-				playerName.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				playerName.setBackgroundColor(rowColor);
 				pixels = (int) (5 * scale + 0.5f);
 				playerName.setPadding(pixels, pixels, pixels, pixels);
 				// Player Position Text
 				playerPos.setText(box.Position);
 				playerPos.setLayoutParams(posParams);
-				playerPos.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				playerPos.setBackgroundColor(rowColor);
 				playerPos.setPadding(pixels, pixels, pixels, pixels);
 				
 				// Add the text to the row
@@ -169,7 +193,7 @@ public class AdvancedBoxScoreFragment extends Fragment {
 				
 				// Create a TableRow and TextViews for Stats side of the Table
 				TableRow.LayoutParams statsParam = new TableRow.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1);
-				pixels = (int) (1 * scale + 0.5f);
+				pixels = (int) (0.5f * scale + 0.5f);
 				statsParam.setMargins(pixels, pixels, pixels, pixels);
 				TableRow statsRow = new TableRow(getActivity());
 				TextView mins = new TextView(getActivity());
@@ -193,68 +217,68 @@ public class AdvancedBoxScoreFragment extends Fragment {
 				// Mins
 				mins.setText(Integer.toString(box.Minutes));
 				mins.setLayoutParams(statsParam);
-				mins.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				mins.setBackgroundColor(rowColor);
 				mins.setPadding(pixels, pixels, pixels, pixels);
 				// TS%
 				tsp.setText(Float.toString(advbox.TrueShootingPercent));
 				tsp.setLayoutParams(statsParam);
-				tsp.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				tsp.setBackgroundColor(rowColor);
 				tsp.setPadding(pixels, pixels, pixels, pixels);
 				//tsp.setPadding(5, 5, 5, 5);
 				// eFG%
 				efg.setText(Float.toString(advbox.EFGPercent));
 				efg.setLayoutParams(statsParam);
-				efg.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				efg.setBackgroundColor(rowColor);
 				efg.setPadding(pixels, pixels, pixels, pixels);
 				// OFF REB%
 				orbp.setText(Float.toString(advbox.ORebPercent));
 				orbp.setLayoutParams(statsParam);
-				orbp.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				orbp.setBackgroundColor(rowColor);
 				orbp.setPadding(pixels, pixels, pixels, pixels);
 				// DEF REB%
 				drbp.setText(Float.toString(advbox.DRebPercent));
 				drbp.setLayoutParams(statsParam);
-				drbp.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				drbp.setBackgroundColor(rowColor);
 				drbp.setPadding(pixels, pixels, pixels, pixels);
 				// Total REB%
 				trbp.setText(Float.toString(advbox.TotRebPercent));
 				trbp.setLayoutParams(statsParam);
-				trbp.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				trbp.setBackgroundColor(rowColor);
 				trbp.setPadding(pixels, pixels, pixels, pixels);
 				// Assist%
 				astp.setText(Float.toString(advbox.AssistPercent));
 				astp.setLayoutParams(statsParam);
-				astp.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				astp.setBackgroundColor(rowColor);
 				astp.setPadding(pixels, pixels, pixels, pixels);
 				// Steal%
 				stlp.setText(Float.toString(advbox.StealPercent));
 				stlp.setLayoutParams(statsParam);
-				stlp.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				stlp.setBackgroundColor(rowColor);
 				stlp.setPadding(pixels, pixels, pixels, pixels);
 				// Block%
 				blkp.setText(Float.toString(advbox.BlockPercent));
 				blkp.setLayoutParams(statsParam);
-				blkp.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				blkp.setBackgroundColor(rowColor);
 				blkp.setPadding(pixels, pixels, pixels, pixels);
 				// Turnover%
 				tovp.setText(Float.toString(advbox.TOPercent));
 				tovp.setLayoutParams(statsParam);
-				tovp.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				tovp.setBackgroundColor(rowColor);
 				tovp.setPadding(pixels, pixels, pixels, pixels);
 				// Usage
 				usage.setText(Float.toString(advbox.Usage));
 				usage.setLayoutParams(statsParam);
-				usage.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				usage.setBackgroundColor(rowColor);
 				usage.setPadding(pixels, pixels, pixels, pixels);
 				// Offensive Rating
 				offrating.setText(Float.toString(advbox.OffRating));
 				offrating.setLayoutParams(statsParam);
-				offrating.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				offrating.setBackgroundColor(rowColor);
 				offrating.setPadding(pixels, pixels, pixels, pixels);
 				// Defensive Rating
 				defrating.setText(Float.toString(advbox.DefRating));
 				defrating.setLayoutParams(statsParam);
-				defrating.setBackgroundColor(getResources().getColor(R.color.WHITE));
+				defrating.setBackgroundColor(rowColor);
 				defrating.setPadding(pixels, pixels, pixels, pixels);
 				
 				// Add the text to the row
