@@ -20,6 +20,7 @@ public class BasketballGame {
 	
 	private static final String TAG = "NBAStatStream";
 	
+	String Date;
 	String HomeTeam;
 	String AwayTeam;
 	int OT;
@@ -397,11 +398,11 @@ public class BasketballGame {
 			// Calculate the Offensive and Defensive Ratings
 			// Offensive Rating
 			float offrating = calculateRatings(box, home, true);
-			offrating = precision(0, offrating);
+			offrating = precision(1, offrating);
 			advBox.OffRating = offrating;
 			// Defensive Rating
 			float defrating = calculateRatings(box, home, false);
-			defrating = precision(0, defrating);
+			defrating = precision(1, defrating);
 			advBox.DefRating = defrating;
 		}
 		
@@ -721,5 +722,26 @@ public class BasketballGame {
 		BigDecimal bd = new BigDecimal(Float.toString(d));
 		bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
 		return bd.floatValue();
+	}
+	
+	void parseDate(String date_string) {
+		date_string = date_string.trim();
+		String month = date_string.split(" ")[0];
+		if(month.equals("January")) { Date = "01/" + date_string.split(" ")[1].substring(0, 2) + "/" + date_string.split(" ")[2]; }
+		else if(month.equals("February")) { Date = "02/" + date_string.split(" ")[1].substring(0, 2) + "/" + date_string.split(" ")[2]; }
+		else if(month.equals("March")) { Date = "03/" + date_string.split(" ")[1].substring(0, 2) + "/" + date_string.split(" ")[2]; }
+		else if(month.equals("April")) { Date = "04/" + date_string.split(" ")[1].substring(0, 2) + "/" + date_string.split(" ")[2]; }
+		else if(month.equals("May")) { Date = "05/" + date_string.split(" ")[1].substring(0, 2) + "/" + date_string.split(" ")[2]; }
+		else if(month.equals("June")) { Date = "06/" + date_string.split(" ")[1].substring(0, 2) + "/" + date_string.split(" ")[2]; }
+		else if(month.equals("July")) { Date = "07/" + date_string.split(" ")[1].substring(0, 2) + "/" + date_string.split(" ")[2]; }
+		else if(month.equals("August")) { Date = "08/" + date_string.split(" ")[1].substring(0, 2) + "/" + date_string.split(" ")[2]; }
+		else if(month.equals("September")) { Date = "09/" + date_string.split(" ")[1].substring(0, 2) + "/" + date_string.split(" ")[2]; }
+		else if(month.equals("October")) { Date = "10/" + date_string.split(" ")[1].substring(0, 2) + "/" + date_string.split(" ")[2]; }
+		else if(month.equals("November")) { Date = "11/" + date_string.split(" ")[1].substring(0, 2) + "/" + date_string.split(" ")[2]; }
+		else if(month.equals("December")) { Date = "12/" + date_string.split(" ")[1].substring(0, 2) + "/" + date_string.split(" ")[2]; }
+		else { 
+			Log.d(TAG, "Could not match date month for date = " + date_string);
+			Date = "13/13/13";
+		}
 	}
 }
