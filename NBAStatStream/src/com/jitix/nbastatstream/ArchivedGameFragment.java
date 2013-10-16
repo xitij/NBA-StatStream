@@ -4,15 +4,20 @@ import java.util.Vector;
 import com.jitix.nbastatstream.BasketballGame.AdvancedStatName;
 import com.jitix.nbastatstream.BasketballGame.StatName;
 import com.jitix.nbastatstream.NBAStatStream.TeamInfo;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class ArchivedGameFragment extends Fragment implements OnClickListener {
@@ -77,11 +82,32 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener {
 			Log.d(TAG, "clicked on Away Team Button");
 			myFrag = getAdvBoxFrag(0);
 			switchAdvBoxScoreFrag(myFrag);
+			toggleSelected(v);
 			break;
 		case R.id.adv_box_home_team_button:
 			Log.d(TAG, "clicked on Home Team Button");
 			myFrag = getAdvBoxFrag(1);
 			switchAdvBoxScoreFrag(myFrag);
+			toggleSelected(v);
+			break;
+		default:
+			// Do Nothing
+			break;
+		}
+	}
+	
+	private void toggleSelected(View v) {
+		View otherButton;
+		switch(v.getId()) {
+		case R.id.adv_box_away_team_button:
+			v.setSelected(true);
+			otherButton = getView().findViewById(R.id.adv_box_home_team_button);
+			otherButton.setSelected(false);
+			break;
+		case R.id.adv_box_home_team_button:
+			v.setSelected(true);
+			otherButton = getView().findViewById(R.id.adv_box_away_team_button);
+			otherButton.setSelected(false);
 			break;
 		default:
 			// Do Nothing
@@ -143,48 +169,69 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener {
 		// Look up the TeamInfo
 		TeamInfo homeTeamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam);
 		TeamInfo awayTeamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam);
+		// Set the game date
+		TextView date = (TextView)getView().findViewById(R.id.four_factors_game_date);
+		date.setText(myGame.Date);
 		// Set the logos
-		ImageView homelogo = (ImageView)getView().findViewById(R.id.home_logo);
+		ImageView homelogo = (ImageView)getView().findViewById(R.id.four_factors_home_logo);
 		homelogo.setImageResource(homeTeamInfo.image_resource);
-		ImageView awaylogo = (ImageView)getView().findViewById(R.id.away_logo);
+		ImageView awaylogo = (ImageView)getView().findViewById(R.id.four_factors_away_logo);
 		awaylogo.setImageResource(awayTeamInfo.image_resource);
+		// Set the team names
+		TextView awayName = (TextView)getView().findViewById(R.id.four_factors_away_name);
+		Spannable span = new SpannableString(myGame.AwayTeam.split(" ", 2)[0] + "\n" + myGame.AwayTeam.split(" ", 2)[1]);
+		awayName.setText(span);
+		TextView homeName = (TextView)getView().findViewById(R.id.four_factors_home_name);
+		span = new SpannableString(myGame.HomeTeam.split(" ", 2)[0] + "\n" + myGame.HomeTeam.split(" ", 2)[1]);
+		homeName.setText(span);
 		// Set the Scores
-		TextView homeScore = (TextView) getView().findViewById(R.id.home_score);
-		homeScore.setText(Float.toString(myGame.HomeTeamStats.get(StatName.POINTS)));
-		TextView awayScore = (TextView) getView().findViewById(R.id.away_score);
-		awayScore.setText(Float.toString(myGame.AwayTeamStats.get(StatName.POINTS)));
+		int awayScoreValue = myGame.AwayTeamStats.get(StatName.POINTS).intValue();
+		int homeScoreValue = myGame.HomeTeamStats.get(StatName.POINTS).intValue();
+		TextView homeScore = (TextView) getView().findViewById(R.id.four_factors_home_score);
+		homeScore.setText(Integer.toString(homeScoreValue));
+		TextView awayScore = (TextView) getView().findViewById(R.id.four_factors_away_score);
+		awayScore.setText(Integer.toString(awayScoreValue));
+		// Highlight the winning team score
+		if(homeScoreValue > awayScoreValue) { 
+			homeScore.setTextColor(getResources().getColor(R.color.HIGHLIGHT_BLUE));
+			homeScore.setShadowLayer(1, 1, 1, getResources().getColor(R.color.BLACK));
+		}
+		else { 
+			awayScore.setTextColor(getResources().getColor(R.color.HIGHLIGHT_BLUE));
+			awayScore.setShadowLayer(1, 1, 1, getResources().getColor(R.color.BLACK));
+		}
 		// Set the team name abbreviations
-		TextView homename = (TextView)getView().findViewById(R.id.home_team_name);
+		TextView homename = (TextView)getView().findViewById(R.id.four_factors_table_home_team_name);
 		homename.setText(homeTeamInfo.abbrev);
-		TextView awayname = (TextView)getView().findViewById(R.id.away_team_name);
+		TextView awayname = (TextView)getView().findViewById(R.id.four_factors_table_away_team_name);
 		awayname.setText(awayTeamInfo.abbrev);
 		// Set the pace
-		TextView pace = (TextView)getView().findViewById(R.id.game_pace);
+		TextView pace = (TextView)getView().findViewById(R.id.four_factors_table_game_pace);
 		pace.setText(Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.PACE)));
 		// Set the Efficiency
-		TextView homeEff = (TextView)getView().findViewById(R.id.home_eff);
+		TextView homeEff = (TextView)getView().findViewById(R.id.four_factors_table_home_eff);
 		homeEff.setText(Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.OFFEFF)));
-		TextView awayEff = (TextView)getView().findViewById(R.id.away_eff);
+		TextView awayEff = (TextView)getView().findViewById(R.id.four_factors_table_away_eff);
 		awayEff.setText(Float.toString(myGame.AwayTeamAdvStats.get(AdvancedStatName.OFFEFF)));
 		// Set the eFG%
-		TextView homeEFG = (TextView)getView().findViewById(R.id.home_efg);
+		TextView homeEFG = (TextView)getView().findViewById(R.id.four_factors_table_home_efg);
 		homeEFG.setText(Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.EFGPERCENT)));
-		TextView awayEFG = (TextView)getView().findViewById(R.id.away_efg);
+		TextView awayEFG = (TextView)getView().findViewById(R.id.four_factors_table_away_efg);
 		awayEFG.setText(Float.toString(myGame.AwayTeamAdvStats.get(AdvancedStatName.EFGPERCENT)));
 		// Set the FT/FG
-		TextView homeFTFG = (TextView)getView().findViewById(R.id.home_ftfg);
+		TextView homeFTFG = (TextView)getView().findViewById(R.id.four_factors_table_home_ftfg);
 		homeFTFG.setText(Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.FTFGA)));
-		TextView awayFTFG = (TextView)getView().findViewById(R.id.away_ftfg);
+		TextView awayFTFG = (TextView)getView().findViewById(R.id.four_factors_table_away_ftfg);
 		awayFTFG.setText(Float.toString(myGame.AwayTeamAdvStats.get(AdvancedStatName.FTFGA)));
 		// Set the Offensive REB %
-		TextView homeOREB = (TextView)getView().findViewById(R.id.home_oreb);
+		TextView homeOREB = (TextView)getView().findViewById(R.id.four_factors_table_home_oreb);
 		homeOREB.setText(Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.OREBPERCENT)));
-		TextView awayOREB = (TextView)getView().findViewById(R.id.away_oreb);
+		TextView awayOREB = (TextView)getView().findViewById(R.id.four_factors_table_away_oreb);
 		awayOREB.setText(Float.toString(myGame.AwayTeamAdvStats.get(AdvancedStatName.OREBPERCENT)));
 		// Set the Turnover %
-		TextView homeTO = (TextView)getView().findViewById(R.id.home_tor);
+		TextView homeTO = (TextView)getView().findViewById(R.id.four_factors_table_home_tor);
 		homeTO.setText(Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.TOPERCENT)));
-		TextView awayTO = (TextView)getView().findViewById(R.id.away_tor);
+		TextView awayTO = (TextView)getView().findViewById(R.id.four_factors_table_away_tor);
 		awayTO.setText(Float.toString(myGame.AwayTeamAdvStats.get(AdvancedStatName.TOPERCENT)));
 	}
 
@@ -192,6 +239,9 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener {
 		// Update the view with the data in the BasketballGame object
 		Bundle args = getArguments();
 		Log.d(TAG, "inside updateAdvBox Page num = " + args.getInt(PAGE_NUM));
+		
+		// Update the Button color, logo, and text
+		updateButtonInfo(myGame);
 		
 		// Check the Away Team Box
 		AdvancedBoxScoreFragment BoxFrag = (AdvancedBoxScoreFragment) getAdvBoxFrag(0);
@@ -221,5 +271,39 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener {
 		
 		TextView tmpText = (TextView)getView().findViewById(R.id.shotchart_test);
 		tmpText.setText("Updating this page");
+	}
+	
+	
+	//
+	// Function used by the AdvancedBoxScore Page to update the button text, color, image
+	//
+	private void updateButtonInfo(BasketballGame myGame) {
+		// Look up the TeamInfo
+		TeamInfo homeTeamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam);
+		TeamInfo awayTeamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam);
+		
+		// Set the Away Team Button
+		LinearLayout awayButton = (LinearLayout) getView().findViewById(R.id.adv_box_away_team_button); 
+		TextView awayName = (TextView)getView().findViewById(R.id.adv_box_away_team_name);
+		awayName.setText(myGame.AwayTeam);
+		ImageView awayLogo = (ImageView)getView().findViewById(R.id.adv_box_away_team_logo);
+		awayLogo.setImageDrawable(getResources().getDrawable(awayTeamInfo.image_resource));
+		// Set the StateList
+		StateListDrawable awayList = new StateListDrawable();
+		//awayList.addState(new int[] { android.R.attr.state_pressed }, new ColorDrawable(getResources().getColor(awayTeamInfo.color_secondary)));
+		awayList.addState(new int[] { android.R.attr.state_selected }, new ColorDrawable(getResources().getColor(awayTeamInfo.color_secondary)));
+		awayButton.setBackground(awayList);
+		
+		// Set the Home Team Button
+		LinearLayout homeButton = (LinearLayout) getView().findViewById(R.id.adv_box_home_team_button);
+		TextView homeName = (TextView)getView().findViewById(R.id.adv_box_home_team_name);
+		homeName.setText(myGame.HomeTeam);
+		ImageView homeLogo = (ImageView)getView().findViewById(R.id.adv_box_home_team_logo);
+		homeLogo.setImageDrawable(getResources().getDrawable(homeTeamInfo.image_resource));
+		// Set the StateList
+		StateListDrawable homeList = new StateListDrawable();
+		//homeList.addState(new int[] { android.R.attr.state_pressed }, new ColorDrawable(getResources().getColor(homeTeamInfo.color_secondary)));
+		homeList.addState(new int[] { android.R.attr.state_selected }, new ColorDrawable(getResources().getColor(homeTeamInfo.color_secondary)));
+		homeButton.setBackground(homeList);
 	}
 }
