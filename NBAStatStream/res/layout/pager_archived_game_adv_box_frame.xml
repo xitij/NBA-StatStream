@@ -8,21 +8,44 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
-	    <Button 
-	        android:id="@+id/adv_box_away_team_button"
-	        android:layout_width="0dp"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
-	        android:text="AWAY"
-	        android:padding="5dp"/>
+        <LinearLayout 
+            android:id="@+id/adv_box_away_team_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:clickable="true" >
+            <ImageView 
+                android:id="@+id/adv_box_away_team_logo"
+                android:layout_width="50.0dp"
+                android:layout_height="50.0dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"/>
+            <TextView 
+                android:id="@+id/adv_box_away_team_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/adv_box_home_team_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:clickable="true" >
+            <TextView
+                android:id="@+id/adv_box_home_team_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <ImageView
+                android:id="@+id/adv_box_home_team_logo"
+                android:layout_width="50.0dp"
+                android:layout_height="50.0dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
+        </LinearLayout>
 	    
-	    <Button 
-	        android:id="@+id/adv_box_home_team_button"
-	        android:layout_width="0dp"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
-	        android:text="HOME"
-	        android:padding="5dp"/>
     </LinearLayout>
 
     <FrameLayout 
