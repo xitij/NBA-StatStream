@@ -143,6 +143,7 @@ public class GameParser {
 		
 		// Set the team names
 		String gameTitle = gameDocument.title().toString();
+		parsedGame.parseDate( gameTitle.split("-")[2] );
 		parsedGame.AwayTeam = gameTitle.substring(0, gameTitle.indexOf("vs.") - 1);
 		parsedGame.HomeTeam = gameTitle.substring(gameTitle.indexOf("vs.") + 4, gameTitle.indexOf("-") - 1);
 		
