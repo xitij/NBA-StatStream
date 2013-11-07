@@ -2,12 +2,16 @@
 <resources>
     <color name="BLACK">#FF000000</color>
     <color name="WHITE">#FFFFFFFF</color>
+    <color name="BACKGROUND_BLUE">#FF007BA7</color>
+    <color name="ROYAL_BLUE">#FF002366</color>
+    <color name="HIGHLIGHT_BLUE">#FF00FFFF</color>
     <color name="ROW_LIGHT_GRAY">#FFDCDCDC</color>
     <color name="ROW_GRAY">#FFD3D3D3</color>
+    <color name="GRAY">#FFA9A9A9</color>
+    <color name="DIM_GRAY">#FF696969</color>
     <color name="HIGHLIGHT_GRAY">#FF808080</color>
     <color name="ROW_LIGHT_SLATE_GRAY">#FF778899</color>
     <color name="ROW_DARK_SLATE_GRAY">#FF2F4F4F</color>
-    <color name="HIGHLIGHT_BLUE">#FF00FFFF</color>
     <color name="HAWKS_BLUE">#FF000080</color>
     <color name="HAWKS_RED">#FFFF0000</color>
     <color name="HAWKS_SILVER">#FFC0C0C0</color>
