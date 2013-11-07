@@ -208,4 +208,16 @@ public class ArchivedGame extends FragmentActivity implements OnClickListener, E
 		ArchivedGameFragment shotfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(2);
 		shotfrag.updateShotChart(this.myGame);
 	}
+
+	@Override
+	public void downloadedGames(String result) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void downloadedBox(String result) {
+		// TODO Auto-generated method stub
+		
+	}
 }
