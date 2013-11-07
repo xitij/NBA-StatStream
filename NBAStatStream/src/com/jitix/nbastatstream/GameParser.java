@@ -187,7 +187,7 @@ public class GameParser {
 					String playerName = boxLine[0];
 					String[] playerLine = boxLine[1].trim().split(" ");
 					// Parse the player line string into the BasketballGame object
-					BasketballGame.BoxScoreLine playerBox = parsePlayerBoxScore(playerLine);
+					BoxScoreLine playerBox = parsePlayerBoxScore(playerLine);
 					// Insert the starting player into the correct Team box score
 					if(tbody < 6) {
 						parsedGame.AwayTeamBox.put(playerName, playerBox);
@@ -247,9 +247,9 @@ public class GameParser {
 		
 	}
 	
-	private BasketballGame.BoxScoreLine parsePlayerBoxScore(String[] playerLine) {
+	private BoxScoreLine parsePlayerBoxScore(String[] playerLine) {
 		
-		BasketballGame.BoxScoreLine playerBox = parsedGame.new BoxScoreLine();
+		BoxScoreLine playerBox = new BoxScoreLine();
 		
 		// See ESPN.com box score for the order of these...
 		// Position
