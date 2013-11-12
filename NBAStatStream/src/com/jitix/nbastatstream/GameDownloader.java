@@ -116,7 +116,7 @@ public class GameDownloader extends AsyncTask<Integer, Void, String> {
 	protected void onPostExecute(String result) {
 		super.onPostExecute(result);
 		
-		progress.setVisibility(View.GONE);
+		//progress.setVisibility(View.GONE);
 		
 		// Call the TaskListener finished function
 		Log.d(TAG, "GameDownloader: Successfully called the API and returning the string");
