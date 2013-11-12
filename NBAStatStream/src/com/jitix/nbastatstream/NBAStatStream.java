@@ -9,6 +9,7 @@ import android.app.Notification.Style;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.support.v4.app.DialogFragment;
@@ -66,7 +67,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		Log.d(TAG, "NBAStatStream onCreate");
+		Log.d(TAG, "NBAStatStream onCreate!");
 		
 		///////////////////////////////////////////////////////////////////
 		// Old code
@@ -86,6 +87,38 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		///////////////////////////////////////////////////////////////////
 		// New code for calendar layout 
 		///////////////////////////////////////////////////////////////////
+		
+		/*setContentView(R.layout.image_test);
+		
+		final float scale = getBaseContext().getResources().getDisplayMetrics().density;
+		Log.d(TAG, "scale = " + scale);
+		int pixels = (int) (100.0f * scale + 100.0f);
+		
+		ImageView testImage1 = (ImageView) findViewById(R.id.test1);
+		Bitmap test1 = decodeSampledBitmap(getResources(), getTeamLogo("Pistons"), 150, 150, false);
+		Log.d(TAG, "test1 byte count = " + test1.getByteCount());
+		testImage1.setImageBitmap(test1);
+
+		ImageView testImage3 = (ImageView) findViewById(R.id.test3);
+		Bitmap test3 = Bitmap.createScaledBitmap(test1, 150, 150, false);
+		Log.d(TAG, "test3 byte count = " + test3.getByteCount());
+		testImage3.setImageBitmap(test3);
+		
+		ImageView testImage2 = (ImageView) findViewById(R.id.test2);
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+	    options.inJustDecodeBounds = true;
+	    BitmapFactory.decodeResource(getResources(), getTeamLogo("Pistons"), options);
+	    Log.d(TAG, "inSampleSize = " + options.inSampleSize);
+	    Log.d(TAG, "Decode : outHeight = " + options.outHeight + ", outWidth = " + options.outWidth);
+	    options.inJustDecodeBounds = false;
+		Bitmap test2 = BitmapFactory.decodeResource(getResources(), getTeamLogo("Pistons"), options);
+		Log.d(TAG, "test2 byte count = " + test2.getByteCount());
+		testImage2.setImageBitmap(test2);
+		
+		ImageView testImage4 = (ImageView) findViewById(R.id.test4);
+		Bitmap test4 = decodeSampledBitmap(getResources(), getTeamLogo("Pistons"), 150, 150, true);
+		Log.d(TAG, "test4 byte count = " + test4.getByteCount());
+		testImage4.setImageBitmap(test4);*/
 		
 		setContentView(R.layout.calendar_layout);
 		
@@ -727,7 +760,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		//int away_logo = getTeamLogo(event.getAwayTeam().getLastName());
 		//awayTeamLogo.setImageResource(away_logo);
 		Bitmap away_logo = decodeSampledBitmap(getResources(), getTeamLogo(event.getAwayTeam().getLastName()), 40, 40);
-		Log.d(TAG, "away logo byte count = " + away_logo.getByteCount() );
+		Log.d(TAG, "away logo byte count = " + away_logo.getByteCount());
 		awayTeamLogo.setImageBitmap(away_logo);
 		layout.addView(awayTeamLogo, imageParams);
 		
@@ -934,22 +967,24 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		// First decode with inJustDecodeBounds=true to check dimensions
 	    final BitmapFactory.Options options = new BitmapFactory.Options();
 	    options.inJustDecodeBounds = true;
+	    options.inPreferredConfig = Config.ARGB_8888;
 	    BitmapFactory.decodeResource(res, resId, options);
 
 	    // Calculate inSampleSize
 	    options.inSampleSize = calculateInSampleSize(options, width, height);
 	    Log.d(TAG, "inSampleSize = " + options.inSampleSize);
+	    Log.d(TAG, "Decode : outHeight = " + options.outHeight + ", outWidth = " + options.outWidth);
 
 	    // Decode bitmap with inSampleSize set
 	    options.inJustDecodeBounds = false;
-	    return BitmapFactory.decodeResource(res, resId, options);
+	    Bitmap bitmap = BitmapFactory.decodeResource(res, resId, options);
+    	return Bitmap.createScaledBitmap(bitmap, options.outWidth/options.inSampleSize, options.outHeight/options.inSampleSize, false);
 	}
 	
 	private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
 		// Raw height and width of image
 		final int height = options.outHeight;
 		final int width = options.outWidth;
-		Log.d(TAG, "outHeight = " + options.outHeight + ", outWidth = " + options.outWidth);
 		int inSampleSize = 1;
 
 		if (height > reqHeight || width > reqWidth) {
