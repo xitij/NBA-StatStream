@@ -3,6 +3,8 @@ package com.jitix.nbastatstream;
 import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Map;
+
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.DatePickerDialog;
 import android.app.Notification.Style;
@@ -39,6 +41,7 @@ import android.widget.Toast;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.text.ParseException;
 
 public class NBAStatStream extends FragmentActivity implements TaskListener, OnClickListener, DatePickerDialog.OnDateSetListener {
@@ -70,55 +73,8 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		Log.d(TAG, "NBAStatStream onCreate!");
 		
 		///////////////////////////////////////////////////////////////////
-		// Old code
+		// Setup the calendar layout 
 		///////////////////////////////////////////////////////////////////
-		
-		/*
-		// Old code used for initial screen
-		setContentView(R.layout.activity_nbastat_stream);
-		
-		// Set up click listeners for the buttons
-		View livegame = findViewById(R.id.live_game_button);
-		livegame.setOnClickListener(this);
-		View archivedgame = findViewById(R.id.archived_game_button);
-		archivedgame.setOnClickListener(this);
-		*/
-		
-		///////////////////////////////////////////////////////////////////
-		// New code for calendar layout 
-		///////////////////////////////////////////////////////////////////
-		
-		/*setContentView(R.layout.image_test);
-		
-		final float scale = getBaseContext().getResources().getDisplayMetrics().density;
-		Log.d(TAG, "scale = " + scale);
-		int pixels = (int) (100.0f * scale + 100.0f);
-		
-		ImageView testImage1 = (ImageView) findViewById(R.id.test1);
-		Bitmap test1 = decodeSampledBitmap(getResources(), getTeamLogo("Pistons"), 150, 150, false);
-		Log.d(TAG, "test1 byte count = " + test1.getByteCount());
-		testImage1.setImageBitmap(test1);
-
-		ImageView testImage3 = (ImageView) findViewById(R.id.test3);
-		Bitmap test3 = Bitmap.createScaledBitmap(test1, 150, 150, false);
-		Log.d(TAG, "test3 byte count = " + test3.getByteCount());
-		testImage3.setImageBitmap(test3);
-		
-		ImageView testImage2 = (ImageView) findViewById(R.id.test2);
-		final BitmapFactory.Options options = new BitmapFactory.Options();
-	    options.inJustDecodeBounds = true;
-	    BitmapFactory.decodeResource(getResources(), getTeamLogo("Pistons"), options);
-	    Log.d(TAG, "inSampleSize = " + options.inSampleSize);
-	    Log.d(TAG, "Decode : outHeight = " + options.outHeight + ", outWidth = " + options.outWidth);
-	    options.inJustDecodeBounds = false;
-		Bitmap test2 = BitmapFactory.decodeResource(getResources(), getTeamLogo("Pistons"), options);
-		Log.d(TAG, "test2 byte count = " + test2.getByteCount());
-		testImage2.setImageBitmap(test2);
-		
-		ImageView testImage4 = (ImageView) findViewById(R.id.test4);
-		Bitmap test4 = decodeSampledBitmap(getResources(), getTeamLogo("Pistons"), 150, 150, true);
-		Log.d(TAG, "test4 byte count = " + test4.getByteCount());
-		testImage4.setImageBitmap(test4);*/
 		
 		setContentView(R.layout.calendar_layout);
 		
@@ -144,8 +100,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		
 		// Setup a GameCalendar to listen for date changes
 		//datePicker.setDateListener(gameCalendar);
-		//Initialize the NBATeamInfo Map
-		//initializeTeamInfo();
+		
 		// Download the games for the start date
 		new GameDownloader(this, progress).execute(year, month, day);
 		
@@ -364,6 +319,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		NBATeamInfo.put("Washington Wizards", team);*/
 	}
 	
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -375,10 +331,10 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.live_game_button:
-			startLiveGame();
+			//startLiveGame();
 			break;
 		case R.id.archived_game_button:
-			startArchivedGame();
+			//startArchivedGame();
 			break;
 		case R.id.calendar_date_picker:
 			Bundle b = getDatePickerBundle();
@@ -511,17 +467,20 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		String date = myEvents.getEventsDate();
 		date = date.split("T")[0];
 		date = date.split("-")[0] + date.split("-")[1] + date.split("-")[2];
-		Log.d(TAG, "checkEventClicked: Events date = " + date);
+		Log.d(TAG, "checkEventClicked: Events date = " + date + ", with View ID = " + v.getId());
 		
 		// Check which event was clicked
 		// -ID for each event button = date + event num
 		// -Ex. 2013/10/31 + Event#(0)  = 20131031, Ex. 2013/10/31 + Event#(1) = 20131032, etc...
-		int i = 0;
-		for(Event event : myEvents.getEventList()) {
-	
-			// Create the unique event_id for the view
-			int event_id = Integer.parseInt(event.getEventId().split("-")[0]) + i;
+		int game_idx = v.getId() - Integer.parseInt(date);
+		
+		if(game_idx > -1 && game_idx < myEvents.getEventList().size()) {
+			Event event = myEvents.getEventList().get(game_idx);
 			
+			// Create the unique event_id for the view
+			int event_id = Integer.parseInt(event.getEventId().split("-")[0]) + game_idx;
+			Log.d(TAG, "Trying to match event_id = " + event_id);
+
 			//
 			// Check if user selected one of the events
 			//
@@ -536,13 +495,13 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 				else {
 					Log.d(TAG, "NBAStatStream: Clicked on event = " + event.getAwayTeam().getFullName() + " vs " + event.getHomeTeam().getFullName());
 					Log.d(TAG, "NBAStatStream: Game isn't completed yet, please try again later.");
-					
 				}
 			}
 		}
+			
 	}
 	
-	private void startLiveGame() {
+	/*private void startLiveGame() {
 		Log.d(TAG, "Clicked on live game.");
 		Intent intent = new Intent(this, LiveGame.class);
 		startActivity(intent);
@@ -552,7 +511,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		Log.d(TAG, "Clicked on archived game.");
 		Intent intent = new Intent(this, ArchivedGame.class);
 		startActivity(intent);
-	}
+	}*/
 
 	@Override
 	public void onTaskStarted() {
@@ -572,8 +531,8 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 
 		// Remove the previous events from the view
 		LinearLayout eventsView = (LinearLayout) findViewById(R.id.calendar_events_layout);
-		//int count = eventsView.getChildCount();
-		//eventsView.removeViews(0, count);
+		int count = eventsView.getChildCount();
+		eventsView.removeViews(0, count);
 		
 		// Result has no games
 		if(result.equals(NO_GAME_RESULTS)) {
@@ -598,8 +557,9 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 					//Log.d(TAG, event.getAwayTeam().getFullName() + " vs " + event.getHomeTeam().getFullName());
 					
 					// Create a view for the game
-					RelativeLayout layout = createGameView(event, i);
-					eventsView.addView(layout);
+					//RelativeLayout layout = createGameView(event, i);
+					//eventsView.addView(layout);
+					createGameUI(eventsView, event, i);
 					i++;
 				}
 			} catch(IOException e) {
@@ -884,6 +844,179 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		return layout;
 	}
 	
+	// createGameUI:
+	//	Creates a view for the given Game/Event using a AsyncTask so that the main
+	//	thread isn't stuck waiting for UI updates for each Game/Event to be created.
+	//	It takes a reference to the view which each view will be added.
+	private void createGameUI(LinearLayout eventsView, Event event, int event_num) {
+		final float scale = getBaseContext().getResources().getDisplayMetrics().density;
+		int gameSize = (int) (80.0f * scale + 80.0f);
+		
+		//
+		// Add a View for each Event to our ViewGroup
+		//
+		RelativeLayout layout = new RelativeLayout(this);
+		LinearLayout.LayoutParams viewParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, gameSize);
+		int marginSmall = (int) (1.0f * scale + 1.0f);
+		int marginLarge = (int) (10.0f * scale + 10.0f);
+		//viewParams.setMargins(marginSmall, marginLarge, marginSmall, marginSmall);
+		viewParams.setMargins(marginSmall, marginSmall, marginSmall, marginSmall);
+		layout.setLayoutParams(viewParams);
+		layout.setBackgroundColor(getResources().getColor(R.color.ROW_GRAY));
+		layout.setClickable(true);
+		layout.setOnClickListener(this);
+		int event_id = Integer.parseInt(event.getEventId().split("-")[0]) + event_num;
+		Log.d(TAG, "setting ID = " + event_id);
+		layout.setId(event_id);
+		
+		// Create LayoutParams for the elements
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+		
+		// Create LayoutParams for the logos
+		int pixels = (int) (40.0f * scale + 40.0f);
+		RelativeLayout.LayoutParams imageParams = new RelativeLayout.LayoutParams(pixels, pixels);
+		
+		//
+		// Add the Away Team Logo
+		//
+		ImageView awayTeamLogo = new ImageView(this);
+		int awayTeamLogoID = 1000;
+		awayTeamLogo.setId(awayTeamLogoID);
+		imageParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		imageParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		int padSmall = (int) (3.0f * scale + 3.0f);
+		awayTeamLogo.setPadding(padSmall, padSmall, padSmall, padSmall);
+		awayTeamLogo.setLayoutParams(imageParams);
+		int away_logo = getTeamLogo(event.getAwayTeam().getLastName());
+		loadBitmap(away_logo, awayTeamLogo, pixels, pixels);
+		//Bitmap away_logo = decodeSampledBitmap(getResources(), getTeamLogo(event.getAwayTeam().getLastName()), 40, 40);
+		//Log.d(TAG, "away logo byte count = " + away_logo.getByteCount());
+		//awayTeamLogo.setImageBitmap(away_logo);
+		layout.addView(awayTeamLogo, imageParams);
+		
+		//
+		// Add the Away Team
+		//
+		TextView awayTeam = new TextView(this);
+		int awayTeamID = 1001;
+		awayTeam.setId(awayTeamID);
+		awayTeam.setTypeface(Typeface.SERIF);
+		Spannable span = new SpannableString(event.getAwayTeam().getFirstName() + "\n" + event.getAwayTeam().getLastName());
+		awayTeam.setText(span);
+		awayTeam.setGravity(Gravity.LEFT);
+		awayTeam.setPadding(padSmall, padSmall, padSmall, padSmall);
+		params.addRule(RelativeLayout.RIGHT_OF, awayTeamLogoID);
+		params.addRule(RelativeLayout.ALIGN_BOTTOM, awayTeamLogoID);
+		awayTeam.setLayoutParams(params);
+		layout.addView(awayTeam);
+		
+		//
+		// Add the Away Team Score
+		//
+		
+		//
+		// Add the Away Team Record
+		//
+		
+		//
+		// Add the Home Team Logo
+		//
+		ImageView homeTeamLogo = new ImageView(this);
+		int homeTeamLogoID = 2000;
+		homeTeamLogo.setId(homeTeamLogoID);
+		imageParams = new RelativeLayout.LayoutParams(pixels, pixels);
+		imageParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+		imageParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		homeTeamLogo.setPadding(padSmall, padSmall, padSmall, padSmall);
+		homeTeamLogo.setLayoutParams(imageParams);
+		int home_logo = getTeamLogo(event.getHomeTeam().getLastName());
+		loadBitmap(home_logo, homeTeamLogo, pixels, pixels);
+		//Bitmap home_logo = decodeSampledBitmap(getResources(), getTeamLogo(event.getHomeTeam().getLastName()), 40, 40);
+		//Log.d(TAG, "home logo byte count = " + home_logo.getByteCount() );
+		//homeTeamLogo.setImageBitmap(home_logo);
+		layout.addView(homeTeamLogo);
+		
+		//
+		// Add the Home Team
+		//
+		TextView homeTeam = new TextView(this);
+		int homeTeamID = 2001;
+		homeTeam.setId(homeTeamID);
+		homeTeam.setTypeface(Typeface.SERIF);
+		span = new SpannableString(event.getHomeTeam().getFirstName() + "\n" + event.getHomeTeam().getLastName());
+		homeTeam.setText(span);
+		homeTeam.setGravity(Gravity.RIGHT);
+		homeTeam.setPadding(padSmall, padSmall, padSmall, padSmall);
+		params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params.addRule(RelativeLayout.LEFT_OF, homeTeamLogoID);
+		params.addRule(RelativeLayout.ALIGN_BOTTOM, homeTeamLogoID);
+		homeTeam.setLayoutParams(params);
+		layout.addView(homeTeam);
+		
+		//
+		// Add the Home Team Score
+		//
+		
+		//
+		// Add the Home Team Record
+		//
+
+		//
+		// Add a color bar for the game status
+		// 	Completed = blue, scheduled = grey, active = red
+		//
+		ImageView statusLine = new ImageView(getApplicationContext());
+		int statusLineID = 3000;
+		statusLine.setId(statusLineID);
+		int linePixels = (int) (10.0f * scale + 10.0f);
+		RelativeLayout.LayoutParams lineParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, linePixels);
+		lineParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		statusLine.setLayoutParams(lineParams);
+		if(event.getEventStatus().equals("completed")) {
+			statusLine.setBackgroundColor(getResources().getColor(R.color.BACKGROUND_BLUE));
+		} else {
+			statusLine.setBackgroundColor(getResources().getColor(R.color.DIM_GRAY));
+		}
+		layout.addView(statusLine);
+		
+		//
+		// Add the Game status
+		//
+		TextView status = new TextView(this);
+		int statusID = 3001;
+		status.setId(statusID);
+		status.setText(event.getEventStatus());
+		params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+		params.addRule(RelativeLayout.BELOW, statusLineID);
+		status.setLayoutParams(params);
+		layout.addView(status);
+		
+		//
+		// Add the Game location
+		//
+		TextView location = new TextView(this);
+		int locationID = 4000;
+		location.setId(locationID);
+		span = new SpannableString(event.getSite().getName() + "\n" + event.getSite().getCity() + "\n" + event.getSite().getState());
+		location.setText(span);
+		location.setTextSize(10.0f);
+		location.setGravity(Gravity.CENTER_HORIZONTAL);
+		params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+		params.addRule(RelativeLayout.BELOW, statusID);
+		//params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, statusID);
+		//pixels = (int) (5.0f * scale + 5.0f);
+		//params.setMargins(pixels, pixels, pixels, pixels);
+		location.setLayoutParams(params);
+		layout.addView(location);
+		
+		// Add the Game/Event view to the Events View
+		eventsView.addView(layout);
+		Log.d(TAG, "Added View with ID = " + event_id + " for " + event.getAwayTeam().getFullName() + " vs " + event.getHomeTeam().getFullName());
+	}
+	
+	
 	private int getTeamLogo(String teamName) {
 		int teamLogo;
 		
@@ -1001,5 +1134,42 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		}
 
 		return inSampleSize;
+	}
+	
+	private void loadBitmap(int resId, ImageView imageView, int width, int height) {
+		GameViewWorkerTask task = new GameViewWorkerTask(imageView);
+		task.execute(resId, width, height);
+	}
+	
+	class GameViewWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
+
+		private final WeakReference<ImageView> imageViewReference;
+		private int data = 0;
+		
+		public GameViewWorkerTask(ImageView imageView) {
+			// Use WeakReference to ensure the ImageView can be garbage collected
+			imageViewReference = new WeakReference<ImageView>(imageView);
+		}
+		
+		// Decode the image in the background
+		@Override
+		protected Bitmap doInBackground(Integer... params) {
+			data = params[0];
+			int width = params[1];
+			int height = params[2];
+			return decodeSampledBitmap(getResources(), data, width, height);
+		}
+
+		// Once complete, see if ImageView is still around and set bitmap
+		@Override
+		protected void onPostExecute(Bitmap bitmap) {
+			progress.setVisibility(View.GONE);
+			if(imageViewReference != null && bitmap != null) {
+				final ImageView imageView = imageViewReference.get();
+				if(imageView != null) {
+					imageView.setImageBitmap(bitmap);
+				}
+			}
+		}
 	}
 }
