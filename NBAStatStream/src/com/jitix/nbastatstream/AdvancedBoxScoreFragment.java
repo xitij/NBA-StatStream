@@ -121,12 +121,12 @@ public class AdvancedBoxScoreFragment extends Fragment {
 		// Set the Team Name and get the Proper iterator for the AdvancedBoxScore
 		Iterator<Map.Entry<String, BoxScoreLine>> it;
 		if(home == true) {
-			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam);
-			titleTeam.setText(myGame.HomeTeam);
+			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam.getFullName());
+			titleTeam.setText(myGame.HomeTeam.getFullName());
 			it = myGame.HomeTeamBox.entrySet().iterator();
 		} else {
-			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam);
-			titleTeam.setText(myGame.AwayTeam);
+			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam.getFullName());
+			titleTeam.setText(myGame.AwayTeam.getFullName());
 			it = myGame.AwayTeamBox.entrySet().iterator();
 		}
 		titleTeam.setTextColor(getResources().getColor(R.color.WHITE));
