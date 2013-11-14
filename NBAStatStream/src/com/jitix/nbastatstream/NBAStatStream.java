@@ -84,9 +84,9 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		// Get the current date
 		final Calendar cal = Calendar.getInstance();
 		Integer year = cal.get(Calendar.YEAR);
-		Integer month = cal.get(Calendar.MONTH);
+		Integer month = cal.get(Calendar.MONTH) + 1;
 		Integer day = cal.get(Calendar.DAY_OF_MONTH);
-		String dateString = Integer.toString(month+1) + "/" + day.toString() + "/" + year.toString();
+		String dateString = month + "/" + day.toString() + "/" + year.toString();
 		
 		// Set up the date button
 		Button dateButton = (Button) findViewById(R.id.calendar_date_picker);
@@ -102,13 +102,15 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		//datePicker.setDateListener(gameCalendar);
 		
 		// Download the games for the start date
-		new GameDownloader(this, progress).execute(year, month, day);
+		String monthString = getMonthString(month);
+		new GameDownloader(this, progress).execute(year.toString(), monthString, day.toString());
 		
+		initializeTeamInfo();
 	}
 
 	private void initializeTeamInfo() {
 		// 30 NBA teams
-		/*TeamInfo team = new TeamInfo();
+		TeamInfo team = new TeamInfo();
 		team.abbrev = "ATL";
 		team.image_resource = R.drawable.atl_logo;
 		team.color_main = R.color.HAWKS_RED;
@@ -316,7 +318,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		team.image_resource = R.drawable.was_logo;
 		team.color_main = R.color.WIZARDS_RED;
 		team.color_secondary = R.color.WIZARDS_BLUE;
-		NBATeamInfo.put("Washington Wizards", team);*/
+		NBATeamInfo.put("Washington Wizards", team);
 	}
 	
 	
@@ -390,9 +392,9 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		// Get the current date from the picker
 		Button dateButton = (Button) findViewById(R.id.calendar_date_picker);
 		String date = (String) dateButton.getText();
-		int year = Integer.parseInt(date.split("/")[2]);
-		int month = (Integer.parseInt(date.split("/")[0]) - 1);
-		int day = Integer.parseInt(date.split("/")[1]);
+		Integer year = Integer.parseInt(date.split("/")[2]);
+		Integer month = (Integer.parseInt(date.split("/")[0]) - 1);
+		Integer day = Integer.parseInt(date.split("/")[1]);
 		
 		// Create a calendar and get the previous date
 		Calendar c = Calendar.getInstance();
@@ -410,14 +412,15 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		if(c.before(startDate)) {
 			updateDateButton(startDate.get(Calendar.YEAR), startDate.get(Calendar.MONTH), startDate.get(Calendar.DAY_OF_MONTH));
 			Log.d(TAG, "onDateSet : Date selected was before the first date available from the API.");
-			Log.d(TAG,  "Date = " + (month+1) + "/" + day  + "/" + year);
+			Log.d(TAG,  "Date = " + month + "/" + day  + "/" + year);
 			// Pop up a toast to tell the user the date isn't acceptable
 			String dateErrorEarly = "Game information only goes back to December 16, 2011. Please select a date after that date!";
 			Toast.makeText(getBaseContext(), dateErrorEarly, Toast.LENGTH_LONG).show();
 		} else {
 			updateDateButton(year, month, day);
 			// Call the downloader
-			new GameDownloader(this, progress).execute(year, month, day);
+			String monthString = getMonthString(month+1);
+			new GameDownloader(this, progress).execute(year.toString(), monthString, day.toString());
 		}
 	}
 	
@@ -425,9 +428,9 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		// Get the current date from the picker
 		Button dateButton = (Button) findViewById(R.id.calendar_date_picker);
 		String date = (String) dateButton.getText();
-		int year = Integer.parseInt(date.split("/")[2]);
-		int month = (Integer.parseInt(date.split("/")[0]) - 1);
-		int day = Integer.parseInt(date.split("/")[1]);
+		Integer year = Integer.parseInt(date.split("/")[2]);
+		Integer month = (Integer.parseInt(date.split("/")[0]) - 1);
+		Integer day = Integer.parseInt(date.split("/")[1]);
 		
 		// Create a calendar and get the next date
 		Calendar c = Calendar.getInstance();
@@ -445,7 +448,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		if(c.after(endDate)) {
 			updateDateButton(endDate.get(Calendar.YEAR), endDate.get(Calendar.MONTH), endDate.get(Calendar.DAY_OF_MONTH));
 			Log.d(TAG, "onDateSet : Date selected was after last scheduled date for 2013-2014 Season.");
-			Log.d(TAG,  "Date = " + (month+1) + "/" + day  + "/" + year);
+			Log.d(TAG,  "Date = " + month + "/" + day  + "/" + year);
 			// Pop up a toast to tell the user the date isn't acceptable
 			String dateErrorFuture = "Date selected was after the end of the 2013-2014 season. Please select another date.";
 			Toast.makeText(getBaseContext(), dateErrorFuture, Toast.LENGTH_LONG).show();
@@ -453,7 +456,8 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		else {
 			updateDateButton(year, month, day);
 			// Call the downloader
-			new GameDownloader(this, progress).execute(year, month, day);
+			String monthString = getMonthString(month+1);
+			new GameDownloader(this, progress).execute(year.toString(), monthString, day.toString());
 		}
 	}
 	
@@ -489,7 +493,13 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 				if(event.getEventStatus().equals("completed")) {
 					Log.d(TAG, "NBAStatStream: Clicked on event = " + event.getAwayTeam().getFullName() + " vs " + event.getHomeTeam().getFullName());
 					Log.d(TAG, "NBAStatStream: Starting ArchivedGame Activity to download the box score and display info");
-					//Intent intent = new Intent(this, ArchivedGame.class);
+					
+					// Start the GameDownloader for the box score and set the listener as the new class
+					Intent intent = new Intent(this, ArchivedGame.class);
+					intent.putExtra(ArchivedGame.BOX_ID, event.getEventId());
+					intent.putExtra(ArchivedGame.AWAY_TEAM, event.getAwayTeam().getFullName());
+					intent.putExtra(ArchivedGame.HOME_TEAM, event.getHomeTeam().getFullName());
+					startActivity(intent);
 				}
 				// Can't get the box score yet, post a Toast
 				else {
@@ -529,10 +539,8 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 	public void downloadedGames(String result) {
 		Log.d(TAG, "NBAStatSteam : downloadedGames called!");
 
-		// Remove the previous events from the view
 		LinearLayout eventsView = (LinearLayout) findViewById(R.id.calendar_events_layout);
-		int count = eventsView.getChildCount();
-		eventsView.removeViews(0, count);
+		removeGameView();
 		
 		// Result has no games
 		if(result.equals(NO_GAME_RESULTS)) {
@@ -633,7 +641,8 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 
 			Log.d(TAG, "Selected != previous date. Downloading with date = " + (month+1) + "/" + day + "/" + year);
 			// Get the games for the selected date
-			new GameDownloader(this, progress).execute(year, month, day);
+			String monthString = getMonthString(month+1);
+			new GameDownloader(this, progress).execute(Integer.toString(year), monthString, Integer.toString(day));
 		}
 	}
 	
@@ -719,9 +728,9 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		awayTeamLogo.setLayoutParams(imageParams);
 		//int away_logo = getTeamLogo(event.getAwayTeam().getLastName());
 		//awayTeamLogo.setImageResource(away_logo);
-		Bitmap away_logo = decodeSampledBitmap(getResources(), getTeamLogo(event.getAwayTeam().getLastName()), 40, 40);
-		Log.d(TAG, "away logo byte count = " + away_logo.getByteCount());
-		awayTeamLogo.setImageBitmap(away_logo);
+		//Bitmap away_logo = decodeSampledBitmap(getResources(), getTeamLogo(event.getAwayTeam().getLastName()), 40, 40);
+		//Log.d(TAG, "away logo byte count = " + away_logo.getByteCount());
+		//awayTeamLogo.setImageBitmap(away_logo);
 		layout.addView(awayTeamLogo, imageParams);
 		
 		//
@@ -761,9 +770,9 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		homeTeamLogo.setLayoutParams(imageParams);
 		//int home_logo = getTeamLogo(event.getHomeTeam().getLastName());
 		//homeTeamLogo.setImageResource(home_logo);
-		Bitmap home_logo = decodeSampledBitmap(getResources(), getTeamLogo(event.getHomeTeam().getLastName()), 40, 40);
-		Log.d(TAG, "home logo byte count = " + home_logo.getByteCount() );
-		homeTeamLogo.setImageBitmap(home_logo);
+		//Bitmap home_logo = decodeSampledBitmap(getResources(), getTeamLogo(event.getHomeTeam().getLastName()), 40, 40);
+		//Log.d(TAG, "home logo byte count = " + home_logo.getByteCount() );
+		//homeTeamLogo.setImageBitmap(home_logo);
 		layout.addView(homeTeamLogo);
 		
 		//
@@ -1016,7 +1025,6 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		Log.d(TAG, "Added View with ID = " + event_id + " for " + event.getAwayTeam().getFullName() + " vs " + event.getHomeTeam().getFullName());
 	}
 	
-	
 	private int getTeamLogo(String teamName) {
 		int teamLogo;
 		
@@ -1087,7 +1095,6 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		return teamLogo;
 	}
 	
-	
 	private void updateDateButton(int year, int month, int day) {
 		// Set the selected date on the button
 		Button dateButton = (Button) findViewById(R.id.calendar_date_picker);
@@ -1137,8 +1144,14 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 	}
 	
 	private void loadBitmap(int resId, ImageView imageView, int width, int height) {
-		GameViewWorkerTask task = new GameViewWorkerTask(imageView);
+		BitmapWorkerTask task = new BitmapWorkerTask(getApplicationContext(), imageView, progress);
+		//GameViewWorkerTask task = new GameViewWorkerTask(imageView);
 		task.execute(resId, width, height);
+	}
+	
+	private String getMonthString(int month) {
+		String monthString = month < 10 ? "0" + Integer.toString(month) : Integer.toString(month);
+		return monthString;
 	}
 	
 	class GameViewWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
