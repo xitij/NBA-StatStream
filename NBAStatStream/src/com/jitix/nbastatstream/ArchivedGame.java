@@ -1,5 +1,7 @@
 package com.jitix.nbastatstream;
 
+import java.io.IOException;
+
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.FragmentTransaction;
@@ -9,7 +11,10 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jitix.nbastatstream.ArchivedGameDialog.EditNameDialogListener;
 
 /**
@@ -22,9 +27,12 @@ import com.jitix.nbastatstream.ArchivedGameDialog.EditNameDialogListener;
  *	information for the game. BasketballGame data is then used to populate
  *	the fragments that make up the Activity. 
  */
-public class ArchivedGame extends FragmentActivity implements OnClickListener, EditNameDialogListener, TaskListener {
+public class ArchivedGame extends FragmentActivity implements TaskListener {
 
 	private static final String TAG = "NBAStatStream";
+	public static final String AWAY_TEAM = "com.jitix.nbastatstream.away_team";
+	public static final String HOME_TEAM = "com.jitix.nbastatstream.home_team";
+	public static final String BOX_ID = "com.jitix.nbastatstream.box_id";
 	
 	//
 	// BasketballGame object to hold the important data
@@ -32,10 +40,9 @@ public class ArchivedGame extends FragmentActivity implements OnClickListener, E
 	private static BasketballGame myGame;
 	
 	//
-	// TextView and String for the BoxScore URL
+	// Progress Bar
 	//
-	private TextView boxscore_text;
-	private String boxscore_string;
+	private static ProgressBar progress;
 	
 	//
 	// Pager Adapter and ViewPager to manage the tabs
@@ -43,11 +50,6 @@ public class ArchivedGame extends FragmentActivity implements OnClickListener, E
 	private ArchivedGamePagerAdapter archivedGamePagerAdapter;
 	private static ViewPager viewPager;
 	
-	//
-	// DialogFragment for the box score to be entered
-	//
-	ArchivedGameDialog archived_game_dialog = new ArchivedGameDialog();
-
 	//
 	// onCreate: Sets the view, show the Dialog, tie up views and buttons.
 	//	Also sets up the ViewPage and PageAdapter, and creates and setup ActionBar.
@@ -57,19 +59,26 @@ public class ArchivedGame extends FragmentActivity implements OnClickListener, E
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_archived_game);
 		Log.d(TAG, "ArchivedGame onCreate");
+		
+		// Get the Progress Bar
+		progress = (ProgressBar) findViewById(R.id.game_progress_bar);
+		// Get the request strings
+		String awayTeam = getIntent().getStringExtra(AWAY_TEAM);
+		String homeTeam = getIntent().getStringExtra(HOME_TEAM);
+		String box_id = getIntent().getStringExtra(BOX_ID);
+		//Integer year = Integer.parseInt(date.substring(0, 4));
+		//Integer month = Integer.parseInt(date.substring(4, 6));
+		//Integer day = Integer.parseInt(date.substring(6, 8));
+		
+		//Log.d(TAG, "ArchivedGame received : Away Team = " + awayTeam + ", Home Team = " + homeTeam + ", DATE = " + date);
+		Log.d(TAG, "ArchivedGame received : Box ID = " + box_id);
+		
+		// Start the GameDownloader for the selected box score
+		new GameDownloader(this, progress).execute(box_id);
 
 		///////////////////////////////////////////////////////////////////////////////////////
 		// Setup and initialization goes here...
 		///////////////////////////////////////////////////////////////////////////////////////
-		// Create an AlertDialog for entering box score
-		archived_game_dialog.show(getFragmentManager(), "archived_game_dialog");
-
-		// Tie up the TextView and Button
-		boxscore_text = (TextView) findViewById(R.id.boxscore_url);
-		boxscore_text.setText(R.string.empty_box_score);
-		View edit_button = findViewById(R.id.edit_box_score_button);
-		edit_button.setOnClickListener(this);
-		
 		// Set up the ViewPager and PagerAdapter
 		archivedGamePagerAdapter = new ArchivedGamePagerAdapter(getSupportFragmentManager());
 		viewPager = (ViewPager) findViewById(R.id.pager);
@@ -129,43 +138,6 @@ public class ArchivedGame extends FragmentActivity implements OnClickListener, E
 		super.onStart();
 	}
 
-	//
-	// onClick: Opens the Dialog if the user clicked on the edit button.
-	//
-	@Override
-	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.edit_box_score_button:
-			Bundle args = new Bundle();
-			if(boxscore_string != null) {
-				if(!boxscore_string.isEmpty()) {
-					Log.d(TAG, "onClick edit: boxscore_string = " + boxscore_string);
-					args.putString("saved_box_score_address", boxscore_string);
-				}
-			}
-			archived_game_dialog.setArguments(args);
-			archived_game_dialog.show(getFragmentManager(), "archived_game_dialog");
-			break;
-		}
-	}
-
-	//
-	// onFinishedEditDialog: called when the user has finished editing the box
-	//		score string. BoxScoreDownloader is called to attempt to connect
-	//		and parse.
-	//
-	@Override
-	public void onFinishedEditDialog(String inputText) {
-		boxscore_string = inputText;
-		Log.d(TAG, "onFinishedEditDialog, boxscore = " + boxscore_string);
-		boxscore_text.setText(boxscore_string);
-		
-		// Pass the string as a URL to the BoxScoreDownloader Task to connect and parse...
-		Log.d(TAG, "setting the Parser URL with boxscore_string = " + boxscore_string);
-		// Launch the AsyncTask
-		new BoxScoreDownloader(this).execute(boxscore_string);
-	}
-
 	@Override
 	public void onTaskStarted() {
 		// Might not need this
@@ -183,20 +155,6 @@ public class ArchivedGame extends FragmentActivity implements OnClickListener, E
 		Log.d(TAG, "listened onTaskFinished called");
 		
 		myGame = result;
-		
-		// Print the results for debugging...
-		//myGame.printTeamStats(myGame.HomeTeam);
-		//myGame.printTeamStats(myGame.AwayTeam);
-		//myGame.printTeamAdvStats(myGame.HomeTeam);
-		//myGame.printTeamAdvStats(myGame.AwayTeam);
-		//myGame.printPlayerBoxScoreLine("LeBron James", false);
-		//myGame.printPlayerBoxScoreLine("Shane Battier", false);
-		//myGame.printPlayerBoxScoreLine("Paul George", true);
-		//myGame.printPlayerBoxScoreLine("Gerald Green", true);
-		//myGame.printPlayerAdvBoxScoreLine("LeBron James", false);
-		//myGame.printPlayerAdvBoxScoreLine("Shane Battier", false);
-		//myGame.printPlayerAdvBoxScoreLine("Paul George", true);
-		//myGame.printPlayerAdvBoxScoreLine("Gerald Green", true);
 		
 		// Update the 4 Factors Fragment
 		ArchivedGameFragment fourFactorfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(0);
@@ -217,7 +175,36 @@ public class ArchivedGame extends FragmentActivity implements OnClickListener, E
 
 	@Override
 	public void downloadedBox(String result) {
-		// TODO Auto-generated method stub
-		
+		Log.d(TAG, "ArchivedGame : downloadedBox called");
+		Log.d(TAG, "result = " + result);
+		// Handle the error case
+		if(result == null) {
+			// TODO
+		} else {
+			try {
+				// Map the Box Score into our POJO
+				ObjectMapper mapper = new ObjectMapper();
+				myGame = mapper.readValue(result, BasketballGame.class);
+				
+				// Populate and calculate the stats for the game
+				myGame.populateGame();
+				
+				//
+				// Update all the Fragments and Views
+				//
+				ArchivedGameFragment fourFactorfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(0);
+				fourFactorfrag.update4Factors(this.myGame);
+				ArchivedGameFragment advBoxfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(1);
+				advBoxfrag.updateAdvBox(this.myGame);
+				ArchivedGameFragment shotfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(2);
+				shotfrag.updateShotChart(this.myGame);
+				
+				// Remove the loading bar
+				progress.setVisibility(View.GONE);
+				
+			} catch(IOException e) {
+				Log.d(TAG, "downloadedBox : IOException : " + e.getMessage());
+			}
+		}
 	}
 }
