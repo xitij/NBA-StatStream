@@ -162,27 +162,37 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener {
 	}
 	
 	public void update4Factors(BasketballGame myGame) {
+		final float scale = getActivity().getBaseContext().getResources().getDisplayMetrics().density;
+		
 		// Update the view with the data in the BasketballGame object
 		Bundle args = getArguments();
 		Log.d(TAG, "inside update4Factors Page num = " + args.getInt(PAGE_NUM));
 		
 		// Look up the TeamInfo
-		TeamInfo homeTeamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam);
-		TeamInfo awayTeamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam);
+		TeamInfo homeTeamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam.getFullName());
+		TeamInfo awayTeamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam.getFullName());
 		// Set the game date
 		TextView date = (TextView)getView().findViewById(R.id.four_factors_game_date);
 		date.setText(myGame.Date);
+		
 		// Set the logos
 		ImageView homelogo = (ImageView)getView().findViewById(R.id.four_factors_home_logo);
-		homelogo.setImageResource(homeTeamInfo.image_resource);
+		int width = (int) (100.0f * scale + 100.0f);
+		int height = (int) (100.0f * scale + 100.0f);
+		loadBitmap(homeTeamInfo.image_resource, homelogo, width, height);
+		//homelogo.setImageResource(homeTeamInfo.image_resource);
 		ImageView awaylogo = (ImageView)getView().findViewById(R.id.four_factors_away_logo);
-		awaylogo.setImageResource(awayTeamInfo.image_resource);
+		loadBitmap(awayTeamInfo.image_resource, awaylogo, width, height);
+		//awaylogo.setImageResource(awayTeamInfo.image_resource);
+		
 		// Set the team names
 		TextView awayName = (TextView)getView().findViewById(R.id.four_factors_away_name);
-		Spannable span = new SpannableString(myGame.AwayTeam.split(" ", 2)[0] + "\n" + myGame.AwayTeam.split(" ", 2)[1]);
+		//Spannable span = new SpannableString(myGame.AwayTeam.split(" ", 2)[0] + "\n" + myGame.AwayTeam.split(" ", 2)[1]);
+		Spannable span = new SpannableString(myGame.AwayTeam.getFirstName() + "\n" + myGame.AwayTeam.getLastName());
 		awayName.setText(span);
 		TextView homeName = (TextView)getView().findViewById(R.id.four_factors_home_name);
-		span = new SpannableString(myGame.HomeTeam.split(" ", 2)[0] + "\n" + myGame.HomeTeam.split(" ", 2)[1]);
+		//span = new SpannableString(myGame.HomeTeam.split(" ", 2)[0] + "\n" + myGame.HomeTeam.split(" ", 2)[1]);
+		span = new SpannableString(myGame.HomeTeam.getFirstName() + "\n" + myGame.HomeTeam.getLastName());
 		homeName.setText(span);
 		// Set the Scores
 		int awayScoreValue = myGame.AwayTeamStats.get(StatName.POINTS).intValue();
@@ -279,13 +289,13 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener {
 	//
 	private void updateButtonInfo(BasketballGame myGame) {
 		// Look up the TeamInfo
-		TeamInfo homeTeamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam);
-		TeamInfo awayTeamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam);
+		TeamInfo homeTeamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam.getFullName());
+		TeamInfo awayTeamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam.getFullName());
 		
 		// Set the Away Team Button
 		LinearLayout awayButton = (LinearLayout) getView().findViewById(R.id.adv_box_away_team_button); 
 		TextView awayName = (TextView)getView().findViewById(R.id.adv_box_away_team_name);
-		awayName.setText(myGame.AwayTeam);
+		awayName.setText(myGame.AwayTeam.getFullName());
 		ImageView awayLogo = (ImageView)getView().findViewById(R.id.adv_box_away_team_logo);
 		awayLogo.setImageDrawable(getResources().getDrawable(awayTeamInfo.image_resource));
 		// Set the StateList
@@ -297,7 +307,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener {
 		// Set the Home Team Button
 		LinearLayout homeButton = (LinearLayout) getView().findViewById(R.id.adv_box_home_team_button);
 		TextView homeName = (TextView)getView().findViewById(R.id.adv_box_home_team_name);
-		homeName.setText(myGame.HomeTeam);
+		homeName.setText(myGame.HomeTeam.getFullName());
 		ImageView homeLogo = (ImageView)getView().findViewById(R.id.adv_box_home_team_logo);
 		homeLogo.setImageDrawable(getResources().getDrawable(homeTeamInfo.image_resource));
 		// Set the StateList
@@ -305,5 +315,11 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener {
 		//homeList.addState(new int[] { android.R.attr.state_pressed }, new ColorDrawable(getResources().getColor(homeTeamInfo.color_secondary)));
 		homeList.addState(new int[] { android.R.attr.state_selected }, new ColorDrawable(getResources().getColor(homeTeamInfo.color_secondary)));
 		homeButton.setBackground(homeList);
+	}
+	
+	private void loadBitmap(int resId, ImageView imageView, int width, int height) {
+		BitmapWorkerTask task = new BitmapWorkerTask(getActivity().getApplicationContext(), imageView, null);
+		//GameViewWorkerTask task = new GameViewWorkerTask(imageView);
+		task.execute(resId, width, height);
 	}
 }
