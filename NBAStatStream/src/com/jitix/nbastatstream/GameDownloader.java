@@ -20,7 +20,7 @@ import java.util.zip.GZIPInputStream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class GameDownloader extends AsyncTask<Integer, Void, String> {
+public class GameDownloader extends AsyncTask<String, Void, String> {
 
 	private static final String TAG = "NBAStatStream";
 	private static final String NO_GAME_RESULTS = "NO_RESULTS";
@@ -30,7 +30,7 @@ public class GameDownloader extends AsyncTask<Integer, Void, String> {
 	//
 	// Strings needed to make an API request
 	//
-	private static final String ACCESS_TOKEN 	= "8d897e4e-8497-4bc6-9b3b-bf0611cf2ec0";
+	private static final String ACCESS_TOKEN 	= "d7b833da-2340-4f7c-a6db-681c2ecb6e98";
 	private static final String USER_AGENT_NAME = "NBAStatStream/1.0 (tlourchane@gmail.com)";
 	private static final String AUTHORIZATION 	= "Authorization";
 	private static final String BEARER 			= "Bearer " + ACCESS_TOKEN;
@@ -60,38 +60,32 @@ public class GameDownloader extends AsyncTask<Integer, Void, String> {
 	}
 
 	@Override
-	protected String doInBackground(Integer... params) {
+	protected String doInBackground(String... params) {
 
 		// Determine if its a call to download list of games or box score
 		// -list of games will have 3 args: year, month, date
-		// -box score will have 5 args: year, month, date, awayteam, hometeam
-		boxScore = (params.length == 5);
-		
-		// Get the date
-		Integer year = params[0];
-		Integer month = params[1] + 1; // Android stores months in 0-11
-		Integer day = params[2];
-		//Log.d(TAG, "GameDownloader: Year/Month/Day = " + year + "/" + month + "/" + day);
-		
-		
+		// -box score will have 1 arg: BoxScore ID
+		boxScore = (params.length == 1);
+
 		//
-		// Construct the request URL string and get the team names if applicable
+		// Construct the request URL string
 		//
 		String requestURL;
-		Integer awayTeam;
-		Integer homeTeam;
-		String monthString = month < 10 ? "0" + Integer.toString(month) : Integer.toString(month);
-		String yearString  = Integer.toString(year);
-		String dayString   = Integer.toString(day);
 		
 		if(boxScore) {
-			awayTeam = params[3];
-			homeTeam = params[4];
-			requestURL = BOXSCORE_URL + yearString + monthString + dayString + "-" + 
-						Integer.toString(awayTeam) + "-at-" + Integer.toString(homeTeam);
+			String boxId = params[0];
+			requestURL = BOXSCORE_URL + boxId + ".json";
 		} else {
-			requestURL = EVENTS_URL + "&date=" + yearString + monthString + dayString;
+			// Get the date
+			String year = params[0];
+			String month = params[1];
+			String day = params[2];
+			requestURL = EVENTS_URL + "&date=" + year + month + day;
 		}
+		
+		//String monthString = month < 10 ? "0" + Integer.toString(month) : Integer.toString(month);
+		//String yearString  = Integer.toString(year);
+		//String dayString   = Integer.toString(day);
 		
 		Log.d(TAG, "GameDownloader: Request for boxscore = " + boxScore + ", requestURL = " + requestURL);
 		
