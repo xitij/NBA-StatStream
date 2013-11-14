@@ -13,10 +13,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown=true)
 class BoxScoreLine {
 	
+	@JsonProperty("last_name")
+	public String LastName;
+	@JsonProperty("first_name")
+	private String FirstName;
 	@JsonProperty("display_name")
 	public String Name;
 	@JsonProperty("position")
 	public String Position;
+	@JsonProperty("team_abbreviation")
+	private String TeamAbbrev;
+	@JsonProperty("is_starter")
+	public boolean isStarter;
 	@JsonProperty("minutes")
 	public int	Minutes;
 	@JsonProperty("field_goals_made")
@@ -56,9 +64,23 @@ class BoxScoreLine {
 	public int PlusMinus;
 	@JsonProperty("points")
 	public int Points;
-	@JsonProperty("is_starter")
-	public boolean isStarter;
 
+	public String getLastName() {
+		return LastName;
+	}
+	
+	public void setLastName(String lastName) {
+		this.LastName = lastName;
+	}
+	
+	public String getFirstName() {
+		return FirstName;
+	}
+	
+	public void setFirstName(String firstName) {
+		this.FirstName = firstName;
+	}
+	
 	public String getName() {
 		return Name;
 	}
@@ -73,6 +95,14 @@ class BoxScoreLine {
 	
 	public void setPosition(String position) {
 		this.Position = position;
+	}
+	
+	public String getTeam() {
+		return TeamAbbrev;
+	}
+	
+	public void setTeam(String teamAbbrev) {
+		this.TeamAbbrev = teamAbbrev;
 	}
 	
 	public int getMinutes() {
