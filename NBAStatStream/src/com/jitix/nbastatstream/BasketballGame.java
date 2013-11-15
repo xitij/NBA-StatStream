@@ -6,8 +6,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import android.util.Log;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /*
  * 	BasketballGame:
@@ -16,95 +17,36 @@ import android.util.Log;
  *  play-by-play. It will contains team specific info and stats, as 
  *  well as player stats.
  */
+//Ignore unmapped objects instead of throwing parse exception
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class BasketballGame {
 	
 	private static final String TAG = "NBAStatStream";
 	
+	//
+	// Mapping of JSON Objects for the API
+	//
+	@JsonProperty("away_team")
+	public Team AwayTeam;
+	@JsonProperty("home_team")
+	public Team HomeTeam;
+	@JsonProperty("away_period_scores")
+	private int[] awayPeriodScores;
+	@JsonProperty("home_period_scores")
+	private int[] homePeriodScores;
+	@JsonProperty("away_stats")
+	private BoxScoreLine[] awayStats;
+	@JsonProperty("home_stats")
+	private BoxScoreLine[] homeStats;
+	@JsonProperty("away_totals")
+	private BoxScoreLine awayTotals;
+	@JsonProperty("home_totals")
+	private BoxScoreLine homeTotals;
+	@JsonProperty("officials")
+	private Official[] officials;
+	
 	String Date;
-	String HomeTeam;
-	String AwayTeam;
 	int OT;
-	
-	// Object to hold the standard stats for each player
-	class BoxScoreLine {
-		protected String 	Position;
-		protected int 		Minutes;
-		protected int 		FGMade;
-		protected int 		FGAttempted;
-		protected float 	FGPercent;
-		protected int 		ThreePointMade;
-		protected int 		ThreePointAttempted;
-		protected float 	ThreePointPercent;
-		protected int 		FTMade;
-		protected int 		FTAttempted;
-		protected float 	FTPercent;
-		protected int 		OffReb;
-		protected int 		DefReb;
-		protected int 		Rebounds;
-		protected int 		Assists;
-		protected int 		Steals;
-		protected int 		Blocks;
-		protected int 		BlocksAgainst;
-		protected int		Turnovers;
-		protected int 		Fouls;
-		protected int 		PlusMinus;
-		protected int 		Points;
-		
-		protected void setEmpty() {
-			Minutes = 0;
-			FGMade = 0;
-			FGAttempted = 0;
-			FGPercent = 0.0f;
-			ThreePointMade = 0;
-			ThreePointAttempted = 0;
-			ThreePointPercent = 0.0f;
-			FTMade = 0;
-			FTAttempted = 0;
-			FTPercent = 0;
-			OffReb = 0;
-			DefReb = 0;
-			Rebounds = 0;
-			Assists = 0;
-			Steals = 0;
-			Blocks = 0;
-			BlocksAgainst = 0;
-			Turnovers = 0;
-			Fouls = 0;
-			PlusMinus = 0;
-			Points = 0;
-		}
-	}
-	
-	// Object to hold the advanced stats for each player
-	class AdvancedBoxScoreLine {
-		protected float TrueShootingPercent;
-		protected float EFGPercent;
-		protected float ORebPercent;
-		protected float DRebPercent;
-		protected float TotRebPercent;
-		protected float AssistPercent;
-		protected float StealPercent;
-		protected float BlockPercent;
-		protected float TOPercent;
-		protected float Usage;
-		protected float OffRating;
-		protected float DefRating;
-		
-		protected void setEmpty() {
-			TrueShootingPercent = 0.0f;
-			EFGPercent = 0.0f;
-			ORebPercent = 0.0f;
-			DRebPercent = 0.0f;
-			TotRebPercent = 0.0f;
-			AssistPercent = 0.0f;
-			StealPercent = 0.0f;
-			BlockPercent = 0.0f;
-			TOPercent = 0.0f;
-			Usage = 0.0f;
-			OffRating = 0.0f;
-			DefRating = 0.0f;
-		}
-	}
 	
 	// Standard team stats
 	enum StatName {
@@ -135,6 +77,108 @@ public class BasketballGame {
 	Map<StatName, Float>				AwayTeamStats = new EnumMap<StatName, Float>(StatName.class);
 	Map<AdvancedStatName, Float>		HomeTeamAdvStats = new EnumMap<AdvancedStatName, Float>(AdvancedStatName.class);
 	Map<AdvancedStatName, Float>		AwayTeamAdvStats = new EnumMap<AdvancedStatName, Float>(AdvancedStatName.class);
+	
+	//
+	// Public function that is called to populate all the game information and stats.
+	// This function will call all the helper functions to populate and calculate different
+	// stats. This does all the heavy lifting of the BasketballGame class.
+	//
+	public void populateGame() {
+		
+		// Set the OT flag if necessary
+		if(awayPeriodScores.length > 4 ) {
+			OT = awayPeriodScores.length - 4; 
+		} else {
+			OT = 0;
+		}
+		
+		// Populate the Maps with player box scores
+		populateBoxScore();
+		// Populate the Maps with team total stats
+		populateTeamStats();
+		// Populate the Maps with the advanced team stats
+		calculateTeamAdvStats();
+		// Populate the Maps with the advanced player stats
+		calculatePlayerAdvStats();
+	}
+	
+	//
+	// Function that is used to populate the Map for each team box score
+	//
+	private void populateBoxScore() {
+		
+		// Away Team
+		for(int i = 0; i < awayStats.length; i++) {
+			BoxScoreLine box = awayStats[i];
+			// Set the total rebounds because the API doesn't provide that
+			box.Rebounds = box.DefReb + box.OffReb;
+			
+			String playerName = awayStats[i].getName();
+			AwayTeamBox.put(playerName, box);
+		}
+		
+		// Home Team
+		for(int i = 0; i < homeStats.length; i++) {
+			BoxScoreLine box = homeStats[i];
+			// Set the total rebounds because the API doesn't provide that
+			box.Rebounds = box.DefReb + box.OffReb;
+
+			String playerName = homeStats[i].getName();
+			HomeTeamBox.put(playerName, box);
+		}
+	}
+	
+	//
+	// Function that is used to populate the Map for team total stats
+	//
+	private void populateTeamStats() {
+		
+		// Set the rebounds because they aren't provided
+		awayTotals.Rebounds = awayTotals.DefReb + awayTotals.OffReb;
+		homeTotals.Rebounds = homeTotals.DefReb + homeTotals.OffReb;
+		
+		float[] away_totals = new float[18];
+		away_totals[0] = awayTotals.FGMade;
+		away_totals[1] = awayTotals.FGAttempted;
+		away_totals[2] = awayTotals.FGPercent;
+		away_totals[3] = awayTotals.FTMade;
+		away_totals[4] = awayTotals.FTAttempted;
+		away_totals[5] = awayTotals.FTPercent;
+		away_totals[6] = awayTotals.ThreePointMade;
+		away_totals[7] = awayTotals.ThreePointAttempted;
+		away_totals[8] = awayTotals.ThreePointPercent;
+		away_totals[9] = awayTotals.OffReb;
+		away_totals[10] = awayTotals.DefReb;
+		away_totals[11] = awayTotals.Rebounds;
+		away_totals[12] = awayTotals.Assists;
+		away_totals[13] = awayTotals.Steals;
+		away_totals[14] = awayTotals.Blocks;
+		away_totals[15] = awayTotals.Turnovers;
+		away_totals[16] = awayTotals.Fouls;
+		away_totals[17] = awayTotals.Points;
+		insertAwayTeamStats(away_totals);
+		
+		float[] home_totals = new float[18];
+		home_totals[0] = homeTotals.FGMade;
+		home_totals[1] = homeTotals.FGAttempted;
+		home_totals[2] = homeTotals.FGPercent;
+		home_totals[3] = homeTotals.FTMade;
+		home_totals[4] = homeTotals.FTAttempted;
+		home_totals[5] = homeTotals.FTPercent;
+		home_totals[6] = homeTotals.ThreePointMade;
+		home_totals[7] = homeTotals.ThreePointAttempted;
+		home_totals[8] = homeTotals.ThreePointPercent;
+		home_totals[9] = homeTotals.OffReb;
+		home_totals[10] = homeTotals.DefReb;
+		home_totals[11] = homeTotals.Rebounds;
+		home_totals[12] = homeTotals.Assists;
+		home_totals[13] = homeTotals.Steals;
+		home_totals[14] = homeTotals.Blocks;
+		home_totals[15] = homeTotals.Turnovers;
+		home_totals[16] = homeTotals.Fouls;
+		home_totals[17] = homeTotals.Points;
+		insertHomeTeamStats(home_totals);
+	}
 	
 	//
 	// Function that is used called to populate the Team Total stats after the player
@@ -640,7 +684,7 @@ public class BasketballGame {
 	
 	void printTeamStats(String teamName) {
 		Log.d(TAG, "Printing Team Stats for " + teamName);
-		if(teamName == HomeTeam) {
+		if(teamName == HomeTeam.getLastName()) {
 			Log.d(TAG, "Fast Break Points = " + HomeTeamStats.get(StatName.FASTBREAKPOINTS));
 			Log.d(TAG, "Points in the paint = " + HomeTeamStats.get(StatName.POINTSINTHEPAINT));
 			Log.d(TAG, "Total Team TOs = " + HomeTeamStats.get(StatName.TOTALTEAMTURNOVERS));
@@ -663,7 +707,7 @@ public class BasketballGame {
 			Log.d(TAG, "TOs = " + HomeTeamStats.get(StatName.TURNOVERS));
 			Log.d(TAG, "PF = " + HomeTeamStats.get(StatName.PF));
 			Log.d(TAG, "Points = " + HomeTeamStats.get(StatName.POINTS));
-		} else if(teamName == AwayTeam) {
+		} else if(teamName == AwayTeam.getLastName()) {
 			Log.d(TAG, "Fast Break Points = " + AwayTeamStats.get(StatName.FASTBREAKPOINTS));
 			Log.d(TAG, "Points in the paint = " + AwayTeamStats.get(StatName.POINTSINTHEPAINT));
 			Log.d(TAG, "Total Team TOs = " + AwayTeamStats.get(StatName.TOTALTEAMTURNOVERS));
@@ -691,7 +735,7 @@ public class BasketballGame {
 
 	void printTeamAdvStats(String teamName) {
 		Log.d(TAG, "Printing Team Advanced Stats for " + teamName);
-		if(teamName == HomeTeam) {
+		if(teamName == HomeTeam.getLastName()) {
 			Log.d(TAG, "Pace = " + HomeTeamAdvStats.get(AdvancedStatName.PACE));
 			Log.d(TAG, "Offensive Efficiency = " + HomeTeamAdvStats.get(AdvancedStatName.OFFEFF));
 			Log.d(TAG, "Defensive Efficiency = " + HomeTeamAdvStats.get(AdvancedStatName.DEFEFF));
@@ -703,7 +747,7 @@ public class BasketballGame {
 			Log.d(TAG, "Defensive Turnover % = " + HomeTeamAdvStats.get(AdvancedStatName.DEFTOPERCENT));
 			Log.d(TAG, "(Defensive) Offensive Rebounding % Allowed = " + HomeTeamAdvStats.get(AdvancedStatName.DREBPERCENT));
 			Log.d(TAG, "Defensive FT Made / FG Attempted = " + HomeTeamAdvStats.get(AdvancedStatName.DEFFTFGA));
-		} else if(teamName == AwayTeam) {
+		} else if(teamName == AwayTeam.getLastName()) {
 			Log.d(TAG, "Pace = " + AwayTeamAdvStats.get(AdvancedStatName.PACE));
 			Log.d(TAG, "Offensive Efficiency = " + AwayTeamAdvStats.get(AdvancedStatName.OFFEFF));
 			Log.d(TAG, "Defensive Efficiency = " + AwayTeamAdvStats.get(AdvancedStatName.DEFEFF));

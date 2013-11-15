@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.jitix.nbastatstream.BasketballGame.BoxScoreLine;
 import com.jitix.nbastatstream.NBAStatStream.TeamInfo;
 
 import android.os.Bundle;
@@ -122,12 +121,12 @@ public class AdvancedBoxScoreFragment extends Fragment {
 		// Set the Team Name and get the Proper iterator for the AdvancedBoxScore
 		Iterator<Map.Entry<String, BoxScoreLine>> it;
 		if(home == true) {
-			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam);
-			titleTeam.setText(myGame.HomeTeam);
+			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam.getFullName());
+			titleTeam.setText(myGame.HomeTeam.getFullName());
 			it = myGame.HomeTeamBox.entrySet().iterator();
 		} else {
-			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam);
-			titleTeam.setText(myGame.AwayTeam);
+			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam.getFullName());
+			titleTeam.setText(myGame.AwayTeam.getFullName());
 			it = myGame.AwayTeamBox.entrySet().iterator();
 		}
 		titleTeam.setTextColor(getResources().getColor(R.color.WHITE));
@@ -146,7 +145,7 @@ public class AdvancedBoxScoreFragment extends Fragment {
 		while(it.hasNext()) {
 			Entry<String, BoxScoreLine> pair = it.next();
 			String name = pair.getKey();
-			BasketballGame.BoxScoreLine box = pair.getValue();
+			BoxScoreLine box = pair.getValue();
 			
 			// Get the row color (alternating)
 			int rowColor;
@@ -157,7 +156,7 @@ public class AdvancedBoxScoreFragment extends Fragment {
 			if(box.Minutes != 0) {
 				i++;
 				// Get the advanced box score line
-				BasketballGame.AdvancedBoxScoreLine  advbox;
+				AdvancedBoxScoreLine  advbox;
 				if(home == true) {
 					advbox = myGame.HomeTeamAdvBox.get(name);
 				} else {

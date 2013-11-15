@@ -14,6 +14,7 @@
     <string name="hint_espn_boxscore">ESPN box score address</string>
     <string name="edit_box_score_button">Edit</string>
     <string name="empty_box_score">empty box score</string>
+    <string name="empty_games">No Games Scheduled</string>
     <string name="pager_4factors_title">4 Factors</string>
     <string name="pager_advbox_title">Advanced Box Score</string>
     <string name="pager_shotchart_title">Shot Chart</string>
@@ -23,8 +24,36 @@
     <string name="title_ftfg">FT/FG</string>
     <string name="title_oreb">OReb %</string>
     <string name="title_tor">TO Rate</string>
-    <string name="team_name1">MIA</string>
-    <string name="team_name2">IND</string>
-    
+    <string name="hawks">Hawks</string>
+    <string name="celtics">Celtics</string>
+    <string name="nets">Nets</string>
+    <string name="bobcats">Bobcats</string>
+    <string name="bulls">Bulls</string>
+    <string name="cavs">Cavaliers</string>
+    <string name="mavs">Mavericks</string>
+    <string name="nuggets">Nuggets</string>
+    <string name="pistons">Pistons</string>
+    <string name="warriors">Warriors</string>
+    <string name="rockets">Rockets</string>
+    <string name="pacers">Pacers</string>
+    <string name="clippers">Clippers</string>
+    <string name="lakers">Lakers</string>
+    <string name="grizzlies">Grizzlies</string>
+    <string name="heat">Heat</string>
+    <string name="bucks">Bucks</string>
+    <string name="twolves">Timberwolves</string>
+    <string name="hornets">Hornets</string>
+    <string name="pelicans">Pelicans</string>
+    <string name="knicks">Knicks</string>
+    <string name="thunder">Thunder</string>
+    <string name="magic">Magic</string>
+    <string name="sixers">76ers</string>
+    <string name="suns">Suns</string>
+    <string name="blazers">Trail Blazers</string>
+    <string name="spurs">Spurs</string>
+    <string name="kings">Kings</string>
+    <string name="raptors">Raptors</string>
+    <string name="jazz">Jazz</string>
+    <string name="wizards">Wizards</string>
 
 </resources>

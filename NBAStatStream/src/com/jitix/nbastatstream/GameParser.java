@@ -144,8 +144,8 @@ public class GameParser {
 		// Set the team names
 		String gameTitle = gameDocument.title().toString();
 		parsedGame.parseDate( gameTitle.split("-")[2] );
-		parsedGame.AwayTeam = gameTitle.substring(0, gameTitle.indexOf("vs.") - 1);
-		parsedGame.HomeTeam = gameTitle.substring(gameTitle.indexOf("vs.") + 4, gameTitle.indexOf("-") - 1);
+		//parsedGame.AwayTeam = gameTitle.substring(0, gameTitle.indexOf("vs.") - 1);
+		//parsedGame.HomeTeam = gameTitle.substring(gameTitle.indexOf("vs.") + 4, gameTitle.indexOf("-") - 1);
 		
 		// Determine if the game went to OT and set the amount it so
 		Elements gameState = myDoc.body().getElementsByClass("game-state");
@@ -187,7 +187,7 @@ public class GameParser {
 					String playerName = boxLine[0];
 					String[] playerLine = boxLine[1].trim().split(" ");
 					// Parse the player line string into the BasketballGame object
-					BasketballGame.BoxScoreLine playerBox = parsePlayerBoxScore(playerLine);
+					BoxScoreLine playerBox = parsePlayerBoxScore(playerLine);
 					// Insert the starting player into the correct Team box score
 					if(tbody < 6) {
 						parsedGame.AwayTeamBox.put(playerName, playerBox);
@@ -247,9 +247,9 @@ public class GameParser {
 		
 	}
 	
-	private BasketballGame.BoxScoreLine parsePlayerBoxScore(String[] playerLine) {
+	private BoxScoreLine parsePlayerBoxScore(String[] playerLine) {
 		
-		BasketballGame.BoxScoreLine playerBox = parsedGame.new BoxScoreLine();
+		BoxScoreLine playerBox = new BoxScoreLine();
 		
 		// See ESPN.com box score for the order of these...
 		// Position
