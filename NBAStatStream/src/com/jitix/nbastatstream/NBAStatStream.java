@@ -507,6 +507,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 				}
 				// Can't get the box score yet, post a Toast
 				else {
+					Toast.makeText(getBaseContext(), "Game isn't completed yet. Please try again later.", Toast.LENGTH_SHORT).show();
 					Log.d(TAG, "NBAStatStream: Clicked on event = " + event.getAwayTeam().getFullName() + " vs " + event.getHomeTeam().getFullName());
 					Log.d(TAG, "NBAStatStream: Game isn't completed yet, please try again later.");
 				}
@@ -568,13 +569,13 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		int eventViewId = Integer.parseInt(event.getEventId().split("-")[0]) + id;
 		ImageView awayImageView = (ImageView) findViewById(eventViewId + 1000);
 		//Log.d(TAG, "Using Base Event View id = " + eventViewId + ", ImageView ID = " + (eventViewId + 1000));
-		int awayLogo = getTeamLogo(event.getAwayTeam().getLastName());
+		int awayLogo = getTeamLogo(event.getAwayTeam().getFullName());
 		loadBitmap(awayLogo, awayImageView, pixels, pixels, false);
 		
 		// Get the Home ImageView and resource ID
 		ImageView homeImageView = (ImageView) findViewById(eventViewId + 3000);
 		//Log.d(TAG, "Using Base Event View id = " + eventViewId + ", ImageView ID = " + (eventViewId + 3000));
-		int homeLogo = getTeamLogo(event.getHomeTeam().getLastName());
+		int homeLogo = getTeamLogo(event.getHomeTeam().getFullName());
 		loadBitmap(homeLogo, homeImageView, pixels, pixels, lastEvent);
 	}
 
