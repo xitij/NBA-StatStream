@@ -58,23 +58,26 @@ public class AdvancedBoxScoreFragment extends Fragment {
 			Bundle savedInstanceState) {
 		
 		Bundle args = getArguments();
-		View myView;
-		Log.d(TAG, "onCreateView for team_num = " + args.getInt(TEAM_NUM));
-		Log.d(TAG, "onCreateView for box_update = " + args.getInt(BOX_UPDATE, -1));
-		myView = inflater.inflate(R.layout.pager_archived_game_adv_box, container, false);
+		int team_num = args.getInt(TEAM_NUM, -1);
 		
-		if(args.getInt(BOX_UPDATE, -1) == 1) {
-			Log.d(TAG, "found box_update = " + args.getInt(BOX_UPDATE));
-			
-			// Check if it's a Away or Home Box
-			if(args.getInt(TEAM_NUM, -1) == 0) {
-				updateAdvBoxScoreView(savedGame, false, myView);
-			} else if(args.getInt(TEAM_NUM, -1) == 1) {
-				updateAdvBoxScoreView(savedGame, true, myView);
-			}
+		ArchivedGameFragment parentFrag = (ArchivedGameFragment) getParentFragment();
+		int page_num = parentFrag.getArguments().getInt(ArchivedGameFragment.PAGE_NUM);
+		Log.d(TAG, "Parent Fragment page_num = " + page_num + ", team_num = " + team_num);
+		
+		ViewGroup customView = parentFrag.getAdvBoxView(team_num);
+		if(customView == null) {
+			Log.d(TAG, "AdvancedBoxScoreFragment : onCreateView : customView == null");
+		} else {
+			Log.d(TAG, "AdvancedBoxScoreFragment : onCreateView : viewId = " + customView.getId());
+			Log.d(TAG, "adv_box_view_away = " + R.id.adv_box_view_away + ", adv_box_view_home = " + R.id.adv_box_view_home);
 		}
-
-		return myView;
+		
+		if(customView.getParent() != null) {
+			ViewGroup parent = (ViewGroup) customView.getParent();
+			parent.removeView(customView);
+		}
+		
+		return customView;
 	}
 	
 	@Override
