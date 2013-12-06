@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/frame_parent"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+<merge xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/calendar_parent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/BLACK"
-        android:orientation="vertical" >
+        android:background="@color/BLACK" >
 
         <LinearLayout
             android:id="@+id/calendar_date_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
             android:orientation="horizontal" >
 
             <ImageButton
@@ -54,6 +51,8 @@
             android:id="@+id/calendar_events_scrollview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/calendar_date_layout"
             android:scrollbars="vertical" >
 
             <LinearLayout
@@ -64,20 +63,16 @@
                 android:orientation="vertical" >
             </LinearLayout>
         </ScrollView>
-    </LinearLayout>
-
-    <RelativeLayout
-        android:id="@+id/progress_parent"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <ProgressBar
-            android:id="@+id/calendar_progress_bar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:indeterminate="true"
-            android:visibility="gone" />
     </RelativeLayout>
 
-</FrameLayout>
+    <ProgressBar
+        android:id="@+id/calendar_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="100dp"
+        android:minHeight="100dp"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:indeterminate="true"
+        android:visibility="gone" />
+
+</merge>
