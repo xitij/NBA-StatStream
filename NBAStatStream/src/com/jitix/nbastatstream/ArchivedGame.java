@@ -13,9 +13,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jitix.nbastatstream.ArchivedGameDialog.EditNameDialogListener;
 
 /**
  * ArchivedGame:
@@ -74,7 +72,8 @@ public class ArchivedGame extends FragmentActivity implements TaskListener {
 		Log.d(TAG, "ArchivedGame received : Box ID = " + box_id);
 		
 		// Start the GameDownloader for the selected box score
-		new GameDownloader(this, progress).execute(box_id);
+		progress.setVisibility(View.VISIBLE);
+		new GameDownloader(this).execute(box_id);
 
 		///////////////////////////////////////////////////////////////////////////////////////
 		// Setup and initialization goes here...
@@ -138,45 +137,18 @@ public class ArchivedGame extends FragmentActivity implements TaskListener {
 		super.onStart();
 	}
 
-	@Override
-	public void onTaskStarted() {
-		// Might not need this
-		// Place holder for now...
-	}
-
 	//
-	// onTaskFinished: called after the Box Score Downloader has connected
-	// 		to the game box score, and parsed and populated the game data into the 
-	// 		BasketballGame object. It updated the PagerAdapter with the correct stats
-	// 		and information for the game.
+	// downloadedGames: Stub placeholder function for the TaskListener interface.
+	//		Will never be called for an Game
 	//
-	@Override
-	public void onTaskFinished(BasketballGame result) {
-		Log.d(TAG, "listened onTaskFinished called");
-		
-		myGame = result;
-		
-		// Update the 4 Factors Fragment
-		ArchivedGameFragment fourFactorfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(0);
-		fourFactorfrag.update4Factors(this.myGame);
-		// Update the Advanced Box Score Fragment
-		ArchivedGameFragment advBoxfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(1);
-		advBoxfrag.updateAdvBox(this.myGame);
-		// Update the Shot Chart Fragment
-		ArchivedGameFragment shotfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(2);
-		shotfrag.updateShotChart(this.myGame);
-	}
-
 	@Override
 	public void downloadedGames(String result) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void downloadedBox(String result) {
 		Log.d(TAG, "ArchivedGame : downloadedBox called");
-		Log.d(TAG, "result = " + result);
 		// Handle the error case
 		if(result == null) {
 			// TODO
@@ -199,12 +171,21 @@ public class ArchivedGame extends FragmentActivity implements TaskListener {
 				ArchivedGameFragment shotfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(2);
 				shotfrag.updateShotChart(this.myGame);
 				
-				// Remove the loading bar
-				progress.setVisibility(View.GONE);
-				
 			} catch(IOException e) {
 				Log.d(TAG, "downloadedBox : IOException : " + e.getMessage());
 			}
 		}
+	}
+
+	@Override
+	public void loadImages(Event event, int viewId) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void hideProgress() {
+		// Remove the loading bar
+		progress.setVisibility(View.GONE);
 	}
 }
