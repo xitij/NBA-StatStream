@@ -16,15 +16,15 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
 
 	private final WeakReference<Context> contextReference;
 	private final WeakReference<ImageView> imageViewReference;
-	private final ProgressBar progress;
 	private static final String TAG = "NBAStatStream";
 	private int data = 0;
+	private final boolean last;
 
-	public BitmapWorkerTask(Context context, ImageView imageView, final ProgressBar progress) {
+	public BitmapWorkerTask(Context context, ImageView imageView, final boolean last) {
 		// Use WeakReference to ensure the ImageView can be garbage collected
 		imageViewReference = new WeakReference<ImageView>(imageView);
 		contextReference = new WeakReference<Context>(context);
-		this.progress = progress;
+		this.last = last;
 	}
 
 	// Decode the image in the background
@@ -43,14 +43,21 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
 	// Once complete, see if ImageView is still around and set bitmap
 	@Override
 	protected void onPostExecute(Bitmap bitmap) {
-		if(progress != null) {
-			progress.setVisibility(View.GONE);
-		}
 		if(imageViewReference != null && bitmap != null) {
 			final ImageView imageView = imageViewReference.get();
 			if(imageView != null) {
 				imageView.setImageBitmap(bitmap);
+				// If this is the last image that is loaded, clear the progress bar
+				if(last == true) {
+					Log.d(TAG, "Calling hideProgress");
+					TaskListener listener = (TaskListener) contextReference.get();
+					listener.hideProgress();
+				}
+			} else {
+				Log.d(TAG, "ImageView == null!");
 			}
+		} else {
+			Log.d(TAG, "ImageViewReference or bitmap == null");
 		}
 	}
 
@@ -64,8 +71,8 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
 
 		// Calculate inSampleSize
 		options.inSampleSize = calculateInSampleSize(options, width, height);
-		Log.d(TAG, "inSampleSize = " + options.inSampleSize);
-		Log.d(TAG, "Decode : outHeight = " + options.outHeight + ", outWidth = " + options.outWidth);
+		//Log.d(TAG, "inSampleSize = " + options.inSampleSize);
+		//Log.d(TAG, "Decode : outHeight = " + options.outHeight + ", outWidth = " + options.outWidth);
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
