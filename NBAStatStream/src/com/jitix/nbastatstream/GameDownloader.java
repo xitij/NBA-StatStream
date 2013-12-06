@@ -30,7 +30,7 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 	//
 	// Strings needed to make an API request
 	//
-	private static final String ACCESS_TOKEN 	= "d7b833da-2340-4f7c-a6db-681c2ecb6e98";
+	private static final String ACCESS_TOKEN 	= "fac55d01-3ad7-4e4f-b852-02642b0babe5";
 	private static final String USER_AGENT_NAME = "NBAStatStream/1.0 (tlourchane@gmail.com)";
 	private static final String AUTHORIZATION 	= "Authorization";
 	private static final String BEARER 			= "Bearer " + ACCESS_TOKEN;
@@ -39,24 +39,15 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 	private static final String GZIP 			= "gzip";
 	private static       String EVENTS_URL 		= "https://erikberg.com/events.json?sport=nba";
 	private static       String BOXSCORE_URL 	= "https://erikberg.com/nba/boxscore/";
-	
+
 	// TaskLisntener class
 	private final TaskListener listener;
-	// Progress Bar
-	private final ProgressBar progress;
-	
+
 	// Flag to determine if the download was Game Events or Box Score
 	private boolean boxScore;
-	
-	public GameDownloader(TaskListener listener, final ProgressBar progress) {
+
+	public GameDownloader(TaskListener listener) {
 		this.listener = listener; 
-		this.progress = progress;
-	}
-	
-	@Override
-	protected void onPreExecute() {
-		super.onPreExecute();
-		progress.setVisibility(View.VISIBLE);
 	}
 
 	@Override
@@ -67,11 +58,9 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 		// -box score will have 1 arg: BoxScore ID
 		boxScore = (params.length == 1);
 
-		//
 		// Construct the request URL string
-		//
 		String requestURL;
-		
+
 		if(boxScore) {
 			String boxId = params[0];
 			requestURL = BOXSCORE_URL + boxId + ".json";
@@ -82,13 +71,9 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 			String day = params[2];
 			requestURL = EVENTS_URL + "&date=" + year + month + day;
 		}
-		
-		//String monthString = month < 10 ? "0" + Integer.toString(month) : Integer.toString(month);
-		//String yearString  = Integer.toString(year);
-		//String dayString   = Integer.toString(day);
-		
+
 		Log.d(TAG, "GameDownloader: Request for boxscore = " + boxScore + ", requestURL = " + requestURL);
-		
+
 		StringBuilder sb = null;
 		try {
 			sb = requestAPIData(requestURL);
@@ -96,7 +81,7 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 			Log.d(TAG, "GameDownloader: requestGameEvents : Exception thrown e = " + e);
 			e.printStackTrace();
 		}
-		
+
 		if(sb != null) {
 			// Convert to a string and return it
 			return sb.toString();
@@ -105,25 +90,22 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 			return error;
 		}
 	}
-	
+
 	@Override
 	protected void onPostExecute(String result) {
 		super.onPostExecute(result);
-		
-		//progress.setVisibility(View.GONE);
-		
+
 		// Call the TaskListener finished function
 		Log.d(TAG, "GameDownloader: Successfully called the API and returning the string");
-		//Log.d(TAG, "GameDownloader: returning result = " + result);
 		if(boxScore) {
 			listener.downloadedBox(result);
 		} else {
 			listener.downloadedGames(result);
 		}
 	}
-	
+
 	private StringBuilder requestAPIData(String requestURL) throws IOException {
-		
+
 		InputStream in = null;
 		String encoding = null;
 		try 
@@ -137,7 +119,7 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 			connection.setRequestProperty(USER_AGENT, USER_AGENT_NAME);
 			// Let server know we can handle gzip
 			connection.setRequestProperty(ACCEPT_ENCODING, GZIP);
-			
+
 			in = connection.getInputStream();
 			// Check if response was sent gzipped and decompress it
 			encoding = connection.getContentEncoding();
@@ -153,7 +135,7 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		StringBuilder sb = new StringBuilder();
 		if(in != null && encoding != null) {
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
