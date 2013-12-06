@@ -31,9 +31,9 @@ public class BasketballGame {
 	@JsonProperty("home_team")
 	public Team HomeTeam;
 	@JsonProperty("away_period_scores")
-	private int[] awayPeriodScores;
+	public int[] awayPeriodScores;
 	@JsonProperty("home_period_scores")
-	private int[] homePeriodScores;
+	public int[] homePeriodScores;
 	@JsonProperty("away_stats")
 	private BoxScoreLine[] awayStats;
 	@JsonProperty("home_stats")
