@@ -116,14 +116,14 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		date.setId(R.id.four_factors_date);
 		RelativeLayout.LayoutParams dateParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		dateParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
-		dateParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		dateParams.addRule(RelativeLayout.ABOVE, R.id.adv_box_away_team_logo);
 		date.setGravity(Gravity.CENTER_HORIZONTAL);
 		date.setTextSize(15.0f);
 		date.setText(myGame.Date);
 		fourFactors.addView(date, dateParams);
 
 		// Set the logos
-		int pixels = NBAStatStream.dpToPx(100.0f);
+		int pixels = NBAStatStream.dpToPx(90.0f);
 		int marginSmall = NBAStatStream.dpToPx(5.0f);
 		int marginLarge = NBAStatStream.dpToPx(10.0f);
 		RelativeLayout.LayoutParams imageParams = new RelativeLayout.LayoutParams(pixels, pixels);
@@ -152,7 +152,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		Spannable span = new SpannableString(myGame.AwayTeam.getFirstName() + "\n" + myGame.AwayTeam.getLastName());
 		awayName.setText(span);
 		awayName.setGravity(Gravity.LEFT);
-		awayName.setPadding(marginLarge, 0, 0, 0);
+		awayName.setPadding(marginSmall, 0, 0, 0);
 		Typeface robotoCondBold = Typeface.createFromAsset(activityReference.get().getAssets(), "RobotoCondensed-Bold.ttf");
 		awayName.setTypeface(robotoCondBold);
 		fourFactors.addView(awayName, teamNameParams);
@@ -164,7 +164,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		span = new SpannableString(myGame.HomeTeam.getFirstName() + "\n" + myGame.HomeTeam.getLastName());
 		homeName.setText(span);
 		homeName.setGravity(Gravity.RIGHT);
-		homeName.setPadding(0, 0, marginLarge, 0);
+		homeName.setPadding(0, 0, marginSmall, 0);
 		homeName.setTypeface(robotoCondBold);
 		fourFactors.addView(homeName, teamNameParams);
 
@@ -201,14 +201,27 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 			awayScore.setTextColor(activityReference.get().getResources().getColor(R.color.HIGHLIGHT_BLUE));
 			awayScore.setShadowLayer(1, 1, 1, activityReference.get().getResources().getColor(R.color.BLACK));
 		}
+		
+		// Create the Quarter Score Table
+		TableLayout quarterScores = new TableLayout(activityReference.get());
+		quarterScores.setId(R.id.four_factors_quarter_scores);
+		RelativeLayout.LayoutParams quartersParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		quartersParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+		quartersParams.addRule(RelativeLayout.BELOW, R.id.four_factors_away_name);
+		int marginTop = NBAStatStream.dpToPx(30.0f);
+		quartersParams.setMargins(0, marginTop, 0, 0);
+		//quarterScores.setPadding(0, marginTop, 0, 0);
+		quarterScores.setLayoutParams(quartersParams);
+		quarterScores.setBackgroundColor(activityReference.get().getResources().getColor(R.color.WHITE));
+		quarterScores = addScoresRow(quarterScores);
+		fourFactors.addView(quarterScores);
 
 		// Create the Table Title
 		TextView tableTitle = new TextView(activityReference.get());
 		tableTitle.setId(R.id.four_factors_table_title);
 		RelativeLayout.LayoutParams titleParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		titleParams.addRule(RelativeLayout.BELOW, R.id.four_factors_home_logo);
+		titleParams.addRule(RelativeLayout.BELOW, R.id.four_factors_quarter_scores);
 		titleParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
-		int marginTop = NBAStatStream.dpToPx(30.0f);
 		tableTitle.setPadding(0, marginTop, 0, 0);
 		tableTitle.setTextSize(50.0f);
 		tableTitle.setText(activityReference.get().getResources().getString(R.string.pager_4factors_title));
@@ -284,6 +297,78 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		fourFactors.addView(factorsTable, tableParams);
 
 		return fourFactors;
+	}
+
+	private TableLayout addScoresRow(TableLayout quarterScores) {
+
+		int marginSmall = NBAStatStream.dpToPx(0.5f);
+		int paddingSmall = NBAStatStream.dpToPx(5.0f);
+		TableLayout.LayoutParams rowParams = new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		TableRow.LayoutParams textParams = new TableRow.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1.0f);
+		textParams.setMargins(marginSmall, marginSmall, marginSmall, marginSmall);
+		
+		// Add the Title Row
+		TableRow titleRow = new TableRow(activityReference.get());
+		titleRow.setLayoutParams(rowParams);
+		TextView blankView = new TextView(activityReference.get());
+		blankView.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_DARK_SLATE_GRAY));
+		blankView.setLayoutParams(textParams);
+		blankView.setPadding(paddingSmall, paddingSmall, paddingSmall, paddingSmall);
+		titleRow.addView(blankView);
+		for(int i=0; i<myGame.homePeriodScores.length; i++) {
+			TextView score = new TextView(activityReference.get());
+			score.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_DARK_SLATE_GRAY));
+			score.setText(Integer.toString(i+1));
+			score.setTextColor(activityReference.get().getResources().getColor(R.color.WHITE));
+			score.setGravity(Gravity.CENTER);
+			score.setLayoutParams(textParams);
+			score.setPadding(paddingSmall, paddingSmall, paddingSmall, paddingSmall);
+			titleRow.addView(score);
+		}
+		
+		// Add the Away Row
+		TableRow awayRow = new TableRow(activityReference.get());
+		awayRow.setLayoutParams(rowParams);
+		TextView awayAbbrev = new TextView(activityReference.get());
+		awayAbbrev.setLayoutParams(textParams);
+		awayAbbrev.setText(myGame.AwayTeam.getAbbrev());
+		awayAbbrev.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_LIGHT_GRAY));
+		awayAbbrev.setPadding(paddingSmall, paddingSmall, paddingSmall, paddingSmall);
+		awayRow.addView(awayAbbrev);
+		for(int i=0; i<myGame.awayPeriodScores.length; i++) {
+			TextView score = new TextView(activityReference.get());
+			score.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_LIGHT_GRAY));
+			score.setText(Integer.toString(myGame.awayPeriodScores[i]));
+			score.setGravity(Gravity.CENTER);
+			score.setLayoutParams(textParams);
+			score.setPadding(paddingSmall, paddingSmall, paddingSmall, paddingSmall);
+			awayRow.addView(score);
+		}
+		
+		// Add the Home Row
+		TableRow homeRow = new TableRow(activityReference.get());
+		homeRow.setLayoutParams(rowParams);
+		TextView homeAbbrev = new TextView(activityReference.get());
+		homeAbbrev.setLayoutParams(textParams);
+		homeAbbrev.setText(myGame.HomeTeam.getAbbrev());
+		homeAbbrev.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_LIGHT_GRAY));
+		homeAbbrev.setPadding(paddingSmall, paddingSmall, paddingSmall, paddingSmall);
+		homeRow.addView(homeAbbrev);
+		for(int i=0; i<myGame.homePeriodScores.length; i++) {
+			TextView score = new TextView(activityReference.get());
+			score.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_LIGHT_GRAY));
+			score.setText(Integer.toString(myGame.homePeriodScores[i]));
+			score.setGravity(Gravity.CENTER);
+			score.setLayoutParams(textParams);
+			score.setPadding(paddingSmall, paddingSmall, paddingSmall, paddingSmall);
+			homeRow.addView(score);
+		}
+		
+		quarterScores.addView(titleRow);
+		quarterScores.addView(awayRow);
+		quarterScores.addView(homeRow);
+		
+		return quarterScores;
 	}
 
 	private LinearLayout updateAdvBox() {
@@ -380,7 +465,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 			teamLogo.setId(R.id.adv_box_home_team_logo);
 			teamName.setId(R.id.adv_box_home_team_name);
 			teamColor.setId(R.id.adv_box_home_team_color);
-			teamColor.setBackgroundColor(activityReference.get().getResources().getColor(NBAStatStream.getTeamColor(myGame.HomeTeam.getFullName(), true)));
+			teamColor.setBackgroundColor(activityReference.get().getResources().getColor(NBAStatStream.getTeamColor(myGame.HomeTeam.getFullName(), false)));
 			span = new SpannableString(myGame.HomeTeam.getFirstName() + "\n" + myGame.HomeTeam.getLastName());
 			teamName.setGravity(Gravity.RIGHT);
 			// Set the Params
@@ -394,7 +479,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 			teamLogo.setId(R.id.adv_box_away_team_logo);
 			teamName.setId(R.id.adv_box_away_team_name);
 			teamColor.setId(R.id.adv_box_away_team_color);
-			teamColor.setBackgroundColor(activityReference.get().getResources().getColor(NBAStatStream.getTeamColor(myGame.AwayTeam.getFullName(), true)));
+			teamColor.setBackgroundColor(activityReference.get().getResources().getColor(NBAStatStream.getTeamColor(myGame.AwayTeam.getFullName(), false)));
 			span = new SpannableString(myGame.AwayTeam.getFirstName() + "\n" + myGame.AwayTeam.getLastName());
 			teamName.setGravity(Gravity.LEFT);
 			// Set the Params
@@ -686,7 +771,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		myText.setPadding(padSmall, padSmall, padSmall, padSmall);
 		myText.setGravity(Gravity.CENTER_VERTICAL);
 		myText.setLines(1);
-		myText.setEllipsize(TruncateAt.MARQUEE);
+		myText.setEllipsize(TruncateAt.END);
 		//myText.setMarqueeRepeatLimit(-1);
 		//myText.setHorizontallyScrolling(true);
 		//myText.setFocusable(true);
