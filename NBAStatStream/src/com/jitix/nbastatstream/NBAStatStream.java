@@ -527,6 +527,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		if(result.equals(NO_GAME_RESULTS)) {
 			RelativeLayout emptyView = createEmptyView();
 			eventsView.addView(emptyView);
+			hideProgress();
 			Toast.makeText(getBaseContext(), "There are no games for selected date.", Toast.LENGTH_SHORT).show();
 		} 
 		// The API call returned some games..
