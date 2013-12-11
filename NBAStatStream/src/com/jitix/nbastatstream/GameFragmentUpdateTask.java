@@ -81,11 +81,6 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 			if(parentViewReference != null && result != null) {
 				final ViewGroup parentView = parentViewReference.get();
 				if(parentView != null) {
-					Log.d(TAG, "parentView child # = " + parentView.getChildCount());
-					Log.d(TAG, "parentViewID = " + parentView.getId());
-					Log.d(TAG, "pager_4factors_layoutID = " + R.id.pager_4factors_layout + ", pager_advbox_layoutID = " + R.id.pager_advbox_layout);
-					Log.d(TAG, "adv_box_team_button_barID = " + R.id.adv_box_team_button_bar + ", adv_box_frag_containerID = " + R.id.adv_box_frag_container);
-					Log.d(TAG, "childCount = " + parentView.getChildCount());
 					if(PAGE_NUM == ArchivedGameFragment.BOX_SCORE && parentView.getChildCount() != 0) {
 						Log.d(TAG, "BOX_SCORE! Removing old view before adding result");
 						parentView.removeViewAt(0);
