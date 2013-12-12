@@ -64,4 +64,39 @@
 	<item name="adv_box_table_stats_name_usage" type="id" />
 	<item name="adv_box_table_stats_name_offrating" type="id" />
 	<item name="adv_box_table_stats_name_defrating" type="id" />
+	<item name="box_team_button_bar" type="id" />
+	<item name="box_away_team_button" type="id" />
+	<item name="box_away_team_logo" type="id" />
+	<item name="box_away_team_name" type="id" />
+	<item name="box_away_team_color" type="id" />
+	<item name="box_home_team_button" type="id" />
+	<item name="box_home_team_logo" type="id" />
+	<item name="box_home_team_name" type="id" />
+	<item name="box_home_team_color" type="id" />
+	<item name="box_view_home" type="id" />
+	<item name="box_view_away" type="id" />
+	<item name="box_tables" type="id" />
+	<item name="box_table_players" type="id" />
+	<item name="box_table_players_title" type="id" />
+	<item name="box_table_players_title_team" type="id" />
+	<item name="box_table_players_title_pos" type="id" />
+	<item name="box_table_stats_scroll" type="id" />
+	<item name="box_table_stats" type="id" />
+	<item name="box_table_stats_names" type="id" />
+	<item name="box_table_stats_name_mins" type="id" />
+	<item name="box_table_stats_name_points" type="id" />
+	<item name="box_table_stats_name_fg" type="id" />
+	<item name="box_table_stats_name_fga" type="id" />
+	<item name="box_table_stats_name_threefg" type="id" />
+	<item name="box_table_stats_name_threefga" type="id" />
+	<item name="box_table_stats_name_ft" type="id" />
+	<item name="box_table_stats_name_fta" type="id" />
+	<item name="box_table_stats_name_dreb" type="id" />
+	<item name="box_table_stats_name_oreb" type="id" />
+	<item name="box_table_stats_name_reb" type="id" />
+	<item name="box_table_stats_name_ast" type="id" />
+	<item name="box_table_stats_name_stl" type="id" />
+	<item name="box_table_stats_name_blk" type="id" />
+	<item name="box_table_stats_name_tov" type="id" />
+	<item name="box_table_stats_name_pf" type="id" />
 </resources>
