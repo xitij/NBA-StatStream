@@ -7,4 +7,6 @@ public interface BoxListener {
 	void loadImages(BasketballGame myGame);
 	
 	void createAdvBoxScoreFrag(ViewGroup view, boolean home);
+	
+	void createBoxScoreFrag(ViewGroup view, boolean home);
 }
