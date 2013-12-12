@@ -124,7 +124,7 @@ public class ArchivedGame extends FragmentActivity implements TaskListener {
 			Log.d(TAG, "adding tabs i = " + i);
 			actionBar.addTab(actionBar.newTab().setTabListener(tablistener)
 					.setText(i == 0  ? R.string.pager_4factors_title
-							: (i == 1) ? R.string.pager_advbox_title : R.string.pager_shotchart_title));
+							: (i == 1) ? R.string.pager_box_title : R.string.pager_advbox_title));
 
 		}
 	}
@@ -166,10 +166,12 @@ public class ArchivedGame extends FragmentActivity implements TaskListener {
 				//
 				ArchivedGameFragment fourFactorfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(0);
 				fourFactorfrag.update4Factors(this.myGame);
-				ArchivedGameFragment advBoxfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(1);
+				ArchivedGameFragment boxfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(1);
+				boxfrag.updateBox(this.myGame);
+				ArchivedGameFragment advBoxfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(2);
 				advBoxfrag.updateAdvBox(this.myGame);
-				ArchivedGameFragment shotfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(2);
-				shotfrag.updateShotChart(this.myGame);
+				//ArchivedGameFragment shotfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(2);
+				//shotfrag.updateShotChart(this.myGame);
 				
 			} catch(IOException e) {
 				Log.d(TAG, "downloadedBox : IOException : " + e.getMessage());
