@@ -1,7 +1,12 @@
 package com.jitix.nbastatstream;
 
 import java.lang.ref.WeakReference;
-
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
@@ -14,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -72,6 +78,10 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 	private RelativeLayout updateGameView(Event event) {
 		
 		int gameSize = NBAStatStream.dpToPx(120.0f);
+		Typeface robotoCondLight = Typeface.createFromAsset(activityReference.get().getAssets(), "RobotoCondensed-Light.ttf");
+		Typeface robotoLightItalic = Typeface.createFromAsset(activityReference.get().getAssets(), "Roboto-LightItalic.ttf");
+		Typeface robotoCondBoldItalic = Typeface.createFromAsset(activityReference.get().getAssets(), "RobotoCondensed-BoldItalic.ttf");
+		Typeface roboto = Typeface.createFromAsset(activityReference.get().getAssets(), "Roboto-Regular.ttf");
 		
 		// Create a layout and set the parameters
 		RelativeLayout layout = new RelativeLayout(activityReference.get());
@@ -104,6 +114,8 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 		//int padSmall = (int) (3.0f * scale + 3.0f);
 		int padSmall = NBAStatStream.dpToPx(4.0f);
 		awayTeamLogo.setPadding(padSmall, padSmall, padSmall, padSmall);
+		awayTeamLogo.setScaleType(ScaleType.FIT_CENTER);
+		//awayTeamLogo.setAdjustViewBounds(true);
 		awayTeamLogo.setLayoutParams(imageParams);
 		layout.addView(awayTeamLogo, imageParams);
 		
@@ -111,7 +123,7 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 		TextView awayTeam = new TextView(activityReference.get());
 		int awayTeamID = event_id + 2000;
 		awayTeam.setId(awayTeamID);
-		awayTeam.setTypeface(Typeface.SERIF);
+		awayTeam.setTypeface(robotoCondLight);
 		Spannable span = new SpannableString(event.getAwayTeam().getFirstName() + "\n" + event.getAwayTeam().getLastName());
 		awayTeam.setText(span);
 		awayTeam.setGravity(Gravity.LEFT);
@@ -130,6 +142,7 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 		imageParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 		imageParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		homeTeamLogo.setPadding(padSmall, padSmall, padSmall, padSmall);
+		homeTeamLogo.setScaleType(ScaleType.FIT_CENTER);
 		homeTeamLogo.setLayoutParams(imageParams);
 		layout.addView(homeTeamLogo, imageParams);
 		
@@ -137,7 +150,7 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 		TextView homeTeam = new TextView(activityReference.get());
 		int homeTeamID = event_id + 4000;
 		homeTeam.setId(homeTeamID);
-		homeTeam.setTypeface(Typeface.SERIF);
+		homeTeam.setTypeface(robotoCondLight);
 		span = new SpannableString(event.getHomeTeam().getFirstName() + "\n" + event.getHomeTeam().getLastName());
 		homeTeam.setText(span);
 		homeTeam.setGravity(Gravity.RIGHT);
@@ -169,7 +182,10 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 		TextView status = new TextView(activityReference.get());
 		int statusID = event_id + 6000;
 		status.setId(statusID);
-		status.setText(event.getEventStatus());
+		String eventStatus = event.getEventStatus();
+		eventStatus = eventStatus.substring(0, 1).toUpperCase() + eventStatus.substring(1);
+		//status.setText(event.getEventStatus());
+		status.setText(eventStatus);
 		params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		params.addRule(RelativeLayout.CENTER_HORIZONTAL);
 		params.addRule(RelativeLayout.BELOW, statusLineID);
@@ -180,18 +196,69 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 		TextView location = new TextView(activityReference.get());
 		int locationID = event_id + 7000;
 		location.setId(locationID);
-		span = new SpannableString(event.getSite().getName() + "\n" + event.getSite().getCity() + "\n" + event.getSite().getState());
+		//span = new SpannableString(event.getSite().getName() + "\n" + event.getSite().getCity() + "\n" + event.getSite().getState());
+		span = new SpannableString(event.getSite().getName() + "\n" + event.getSite().getCity() + ", " + event.getSite().getState());
 		location.setText(span);
 		location.setTextSize(10.0f);
 		location.setGravity(Gravity.CENTER_HORIZONTAL);
 		params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		params.addRule(RelativeLayout.CENTER_HORIZONTAL);
 		params.addRule(RelativeLayout.BELOW, statusID);
-		//params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, statusID);
-		//pixels = (int) (5.0f * scale + 5.0f);
-		//params.setMargins(pixels, pixels, pixels, pixels);
 		location.setLayoutParams(params);
 		layout.addView(location);
+		
+		// Add the Game Type (pre, regular, post)
+		TextView gameType = new TextView(activityReference.get());
+		int gameTypeID = event_id + 8000;
+		gameType.setId(gameTypeID);
+		String seasonType = event.getSeasonType(); 
+		if(seasonType.equalsIgnoreCase("pre")) {
+			seasonType = seasonType.substring(0, 1).toUpperCase() + seasonType.substring(1) + "season";
+			gameType.setTypeface(robotoLightItalic);
+			gameType.setTextSize(13.0f);
+		} else if(seasonType.equalsIgnoreCase("post")) {
+			seasonType = "Playoffs";
+			gameType.setTypeface(robotoCondBoldItalic);
+			gameType.setTextSize(18.0f);
+			gameType.setTextColor(activityReference.get().getResources().getColor(R.color.BLAZERS_RED));
+		} else {
+			seasonType = seasonType.substring(0, 1).toUpperCase() + seasonType.substring(1) + " Season";
+			gameType.setTypeface(roboto);
+			gameType.setTextSize(14.0f);
+		}
+		params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		params.addRule(RelativeLayout.BELOW, statusLineID);
+		gameType.setText(seasonType);
+		gameType.setLayoutParams(params);
+		layout.addView(gameType);
+		
+		// Add the Game time
+		if(event.getEventStatus().equalsIgnoreCase("scheduled")) {
+			TextView eventTime = new TextView(activityReference.get());
+			int timeID = event_id + 9000;
+			eventTime.setId(timeID);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
+			Log.d(TAG, "Game time before parse = " + event.getStartDateTime());
+			Date date;
+			try {
+				date = sdf.parse(event.getStartDateTime());
+				Log.d(TAG, "After parse = " + date);
+				DateFormat df = DateFormat.getTimeInstance();
+				String stringDate = df.format(date);
+				eventTime.setText(stringDate.split(" ")[0].substring(0, stringDate.split(" ")[0].length() - 3) + " " + stringDate.split(" ")[1]);
+			} catch (ParseException e) {
+				Log.d(TAG, "ERROR: PARSING DATEFORMAT");
+			}
+
+			eventTime.setTextSize(13.0f);
+			eventTime.setGravity(Gravity.CENTER);
+			params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			params.addRule(RelativeLayout.BELOW, locationID);
+			params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+			eventTime.setLayoutParams(params);
+			layout.addView(eventTime);
+		}
 		
 		return layout;
 	}
