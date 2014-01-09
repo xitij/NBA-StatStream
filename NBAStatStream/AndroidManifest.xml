@@ -43,7 +43,9 @@
         	android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         
+        <!-- 
         <uses-library android:name="android.test.runner"/>
+        -->
     </application>
 
 </manifest>
