@@ -1,11 +1,14 @@
 package com.jitix.nbastatstream;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
@@ -13,11 +16,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GameDownloader extends AsyncTask<String, Void, String> {
 
+	private final WeakReference<Activity> activityReference;
+	private final WeakReference<TaskListener> listenerReference;
 	private static final String TAG = "NBAStatStream";
 	private static final String NO_GAME_RESULTS = "NO_RESULTS";
 
@@ -26,7 +30,7 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 	//
 	// Strings needed to make an API request
 	//
-	private static final String ACCESS_TOKEN 	= "fac55d01-3ad7-4e4f-b852-02642b0babe5";
+	private static final String ACCESS_TOKEN 	= "9d607c10-a6ae-4712-b46b-56cd28181d1a";
 	private static final String USER_AGENT_NAME = "NBAStatStream/1.0 (tlourchane@gmail.com)";
 	private static final String AUTHORIZATION 	= "Authorization";
 	private static final String BEARER 			= "Bearer " + ACCESS_TOKEN;
@@ -36,14 +40,13 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 	private static       String EVENTS_URL 		= "https://erikberg.com/events.json?sport=nba";
 	private static       String BOXSCORE_URL 	= "https://erikberg.com/nba/boxscore/";
 
-	// TaskLisntener class
-	private final TaskListener listener;
-
 	// Flag to determine if the download was Game Events or Box Score
 	private boolean boxScore;
 
-	public GameDownloader(TaskListener listener) {
-		this.listener = listener; 
+	public GameDownloader(Context context, TaskListener listener) {
+		
+		activityReference = new WeakReference<Activity>((Activity) context);
+		listenerReference = new WeakReference<TaskListener>(listener);
 	}
 
 	@Override
@@ -92,11 +95,19 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 		super.onPostExecute(result);
 
 		// Call the TaskListener finished function
-		Log.d(TAG, "GameDownloader: Successfully called the API and returning the string");
-		if(boxScore) {
-			listener.downloadedBox(result);
+		Log.d(TAG, "GameDownloader: Successfully called the XMLStats API and returning the string");
+		if(activityReference != null && activityReference.get() != null) {
+			if(listenerReference != null && listenerReference.get() != null) {
+				if(boxScore) {
+					listenerReference.get().downloadedBox(result);
+				} else {
+					listenerReference.get().downloadedGames(result);
+				}
+			} else {
+				Log.d(TAG, "GameDownloader : onPostExecute : listenerReference or listenerReference.get() == null, Not calling Listener");
+			}
 		} else {
-			listener.downloadedGames(result);
+			Log.d(TAG, "GameDownloader : onPostExecute : activityReference or activtyReference.get() == null, Not calling Listener");
 		}
 	}
 
