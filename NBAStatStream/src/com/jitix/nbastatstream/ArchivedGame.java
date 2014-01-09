@@ -73,7 +73,7 @@ public class ArchivedGame extends FragmentActivity implements TaskListener {
 		
 		// Start the GameDownloader for the selected box score
 		progress.setVisibility(View.VISIBLE);
-		new GameDownloader(this).execute(box_id);
+		new GameDownloader(this, this).execute(box_id);
 
 		///////////////////////////////////////////////////////////////////////////////////////
 		// Setup and initialization goes here...
@@ -136,6 +136,25 @@ public class ArchivedGame extends FragmentActivity implements TaskListener {
 	protected void onStart() {
 		super.onStart();
 	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Log.d(TAG,  "ArchivedGame onPause() called!");
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.d(TAG,  "ArchivedGame onStop() called!");
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		Log.d(TAG,  "ArchivedGame onDestroy() called!");
+	}
+
 
 	//
 	// downloadedGames: Stub placeholder function for the TaskListener interface.
