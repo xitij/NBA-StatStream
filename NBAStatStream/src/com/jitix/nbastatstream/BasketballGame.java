@@ -411,12 +411,12 @@ public class BasketballGame {
 		HomeTeamAdvStats.put(AdvancedStatName.DREBPERCENT, offrebpercent);
 		
 		// Calculate FT per FG Attempted
-		float ftfga = 100 * HomeTeamStats.get(StatName.FT) / HomeTeamStats.get(StatName.FGA);
-		ftfga = precision(1, ftfga);
+		float ftfga = HomeTeamStats.get(StatName.FT) / HomeTeamStats.get(StatName.FGA);
+		ftfga = precision(3, ftfga);
 		HomeTeamAdvStats.put(AdvancedStatName.FTFGA, ftfga);
 		AwayTeamAdvStats.put(AdvancedStatName.DEFFTFGA, ftfga);
-		ftfga = 100 * AwayTeamStats.get(StatName.FT) / AwayTeamStats.get(StatName.FGA);
-		ftfga = precision(1, ftfga);
+		ftfga = AwayTeamStats.get(StatName.FT) / AwayTeamStats.get(StatName.FGA);
+		ftfga = precision(3, ftfga);
 		AwayTeamAdvStats.put(AdvancedStatName.FTFGA, ftfga);
 		HomeTeamAdvStats.put(AdvancedStatName.DEFFTFGA, ftfga);
 	}
