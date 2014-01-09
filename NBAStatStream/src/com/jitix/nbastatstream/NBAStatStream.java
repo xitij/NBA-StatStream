@@ -348,12 +348,6 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case R.id.live_game_button:
-			//startLiveGame();
-			break;
-		case R.id.archived_game_button:
-			//startArchivedGame();
-			break;
 		case R.id.calendar_date_picker:
 			Bundle b = getDatePickerBundle();
 			DialogFragment datePicker = new DatePickerDialogFragment();
