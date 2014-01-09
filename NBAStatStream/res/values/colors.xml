@@ -5,6 +5,7 @@
     <color name="BACKGROUND_BLUE">#FF007BA7</color>
     <color name="ROYAL_BLUE">#FF002366</color>
     <color name="HIGHLIGHT_BLUE">#FF00FFFF</color>
+    <color name="HIGHLIGHT_YELLOW">#FFE5E500</color>
     <color name="ROW_LIGHT_GRAY">#FFDCDCDC</color>
     <color name="ROW_GRAY">#FFD3D3D3</color>
     <color name="GRAY">#FFA9A9A9</color>
@@ -74,6 +75,12 @@
     <color name="TWOLVES_BLACK">#FF000000</color>
     <color name="TWOLVES_GRAY">#FF8C92AC</color>
     <color name="TWOLVES_GREEN">#FF50C878</color>
+    <color name="NETS_NAVY_BLUE">#FF002258</color>
+    <color name="NETS_RED">#FFD32E4C</color>
+    <color name="NETS_SILVER">#FFEFEFF1</color>
+    <color name="HORNETS_TEAL">#FF008FC5</color>
+    <color name="HORNETS_PURPLE">#FF1D1160</color>
+    <color name="HORNETS_GOLD">#FFFD8927</color>
     <color name="PELICANS_DARK_BLUE">#FF00008B</color>
     <color name="PELICANS_GOLD">#FFD4AF37</color>
     <color name="PELICANS_RED">#FFEB003C</color>
