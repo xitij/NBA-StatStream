@@ -105,7 +105,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		// Download the games for the start date
 		String monthString = getMonthString(month);
 		progress.setVisibility(View.VISIBLE);
-		new GameDownloader(this).execute(year.toString(), monthString, day.toString());
+		new GameDownloader(this, this).execute(year.toString(), monthString, day.toString());
 		
 		initializeTeamInfo();
 	}
@@ -237,6 +237,20 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		team.color_main = R.color.TWOLVES_BLUE;
 		team.color_secondary = R.color.TWOLVES_GREEN;
 		NBATeamInfo.put("Minnesota Timberwolves", team);
+		
+		team = new TeamInfo();
+		team.abbrev = "NJ";
+		team.image_resource = R.drawable.nj_logo;
+		team.color_main = R.color.NETS_NAVY_BLUE;
+		team.color_secondary = R.color.NETS_RED;
+		NBATeamInfo.put("New Jersey Nets", team);
+		
+		team = new TeamInfo();
+		team.abbrev = "NOR";
+		team.image_resource = R.drawable.nor_hor_logo;
+		team.color_main = R.color.HORNETS_TEAL;
+		team.color_secondary = R.color.HORNETS_PURPLE;
+		NBATeamInfo.put("New Orleans Hornets", team);
 		
 		team = new TeamInfo();
 		team.abbrev = "NOR";
@@ -423,7 +437,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 			// Call the downloader
 			String monthString = getMonthString(month+1);
 			progress.setVisibility(View.VISIBLE);
-			new GameDownloader(this).execute(year.toString(), monthString, day.toString());
+			new GameDownloader(this, this).execute(year.toString(), monthString, day.toString());
 		}
 	}
 	
@@ -461,7 +475,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 			// Call the downloader
 			String monthString = getMonthString(month+1);
 			progress.setVisibility(View.VISIBLE);
-			new GameDownloader(this).execute(year.toString(), monthString, day.toString());
+			new GameDownloader(this, this).execute(year.toString(), monthString, day.toString());
 		}
 	}
 	
@@ -493,23 +507,32 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 			// Check if user selected one of the events
 			//
 			if(v.getId() == event_id) {
-				// If the event is completed start the Game Activity
-				if(event.getEventStatus().equals("completed")) {
-					Log.d(TAG, "NBAStatStream: Clicked on event = " + event.getAwayTeam().getFullName() + " vs " + event.getHomeTeam().getFullName());
-					Log.d(TAG, "NBAStatStream: Starting ArchivedGame Activity to download the box score and display info");
-					
-					// Start the GameDownloader for the box score and set the listener as the new class
-					Intent intent = new Intent(this, ArchivedGame.class);
-					intent.putExtra(ArchivedGame.BOX_ID, event.getEventId());
-					intent.putExtra(ArchivedGame.AWAY_TEAM, event.getAwayTeam().getFullName());
-					intent.putExtra(ArchivedGame.HOME_TEAM, event.getHomeTeam().getFullName());
-					startActivity(intent);
-				}
-				// Can't get the box score yet, post a Toast
+				// Box Scores only exist for regular and postseason games check
+				if(!event.getSeasonType().equalsIgnoreCase("pre")) {
+					// If the event is completed start the Game Activity
+					if(event.getEventStatus().equals("completed")) {
+						Log.d(TAG, "NBAStatStream: Clicked on event = " + event.getAwayTeam().getFullName() + " vs " + event.getHomeTeam().getFullName());
+						Log.d(TAG, "NBAStatStream: Starting ArchivedGame Activity to download the box score and display info");
+						
+						// Start the GameDownloader for the box score and set the listener as the new class
+						Intent intent = new Intent(this, ArchivedGame.class);
+						intent.putExtra(ArchivedGame.BOX_ID, event.getEventId());
+						intent.putExtra(ArchivedGame.AWAY_TEAM, event.getAwayTeam().getFullName());
+						intent.putExtra(ArchivedGame.HOME_TEAM, event.getHomeTeam().getFullName());
+						startActivity(intent);
+					}
+					// Can't get the box score yet, post a Toast
+					else {
+						Toast.makeText(getBaseContext(), "Game isn't completed yet. Please try again later.", Toast.LENGTH_SHORT).show();
+						Log.d(TAG, "NBAStatStream: Clicked on event = " + event.getAwayTeam().getFullName() + " vs " + event.getHomeTeam().getFullName());
+						Log.d(TAG, "NBAStatStream: Game isn't completed yet, please try again later.");
+					}
+				} 
+				// Can't get the box score for preseason games, post a Toast
 				else {
-					Toast.makeText(getBaseContext(), "Game isn't completed yet. Please try again later.", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getBaseContext(), "Box Scores are only available for Regular Season and Playoff games.", Toast.LENGTH_SHORT).show();
 					Log.d(TAG, "NBAStatStream: Clicked on event = " + event.getAwayTeam().getFullName() + " vs " + event.getHomeTeam().getFullName());
-					Log.d(TAG, "NBAStatStream: Game isn't completed yet, please try again later.");
+					Log.d(TAG, "NBAStatStream: Preseason Box Scores are not available!");
 				}
 			}
 		}
@@ -646,7 +669,7 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 			// Get the games for the selected date
 			String monthString = getMonthString(month+1);
 			progress.setVisibility(View.VISIBLE);
-			new GameDownloader(this).execute(Integer.toString(year), monthString, Integer.toString(day));
+			new GameDownloader(this, this).execute(Integer.toString(year), monthString, Integer.toString(day));
 		}
 	}
 	
@@ -659,17 +682,16 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 	
 	private RelativeLayout createEmptyView() {
 		
-		final float scale = getBaseContext().getResources().getDisplayMetrics().density;
-		int pixels = (int) (100.0f * scale + 100.0f);
-		
 		//
 		// Create an empty view that has no games and return it
 		//
 		RelativeLayout emptyView = new RelativeLayout(getApplicationContext());
+		emptyView.setId(R.id.empty_game_view);
+		int pixels = dpToPx(150.0f);
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, pixels);
 		emptyView.setBackgroundColor(getResources().getColor(R.color.ROW_GRAY));
-		int marginSmall = (int) (1.0f * scale + 1.0f);
-		int marginLarge = (int) (10.0f * scale + 10.0f);
+		int marginSmall = dpToPx(2.0f);
+		int marginLarge = dpToPx(15.0f);
 		params.setMargins(marginSmall, marginLarge, marginSmall, marginSmall);
 		emptyView.setLayoutParams(params);
 		
