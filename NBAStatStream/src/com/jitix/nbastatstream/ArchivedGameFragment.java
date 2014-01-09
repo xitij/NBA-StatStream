@@ -31,6 +31,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 	static final int BOX_SCORE = 1;
 	static final int ADV_BOX_SCORE = 2;
 	static final int SHOT_CHART = 3;
+	private boolean destroyed = false;
 	
 	Vector<Fragment> myAdvBoxFragments = new Vector<Fragment>();
 	Vector<ViewGroup> myAdvBoxViews = new Vector<ViewGroup>();
@@ -82,6 +83,25 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 		return myView;
 	}
 	
+	@Override
+	public void onPause() {
+		super.onPause();
+		Log.d(TAG, "ArchivedGameFragment onPause() called!");
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		Log.d(TAG, "ArchivedGameFragment onStop() called!");
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		Log.d(TAG, "ArchivedGameFragment onDestroy() called!");
+		destroyed = true;
+	}
+
 	@Override
 	public void onClick(View v) {
 		Fragment myFrag;
@@ -146,6 +166,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 	}
 	
 	private void connectTeamButtons(View myView, boolean adv) {
+		
 		// Advanced or Box Buttons
 		View away_button;
 		View home_button;
@@ -294,18 +315,23 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 		Bundle args = getArguments();
 		int page_num = args.getInt(PAGE_NUM);
 		
-		if(page_num == FOUR_FACTORS) {
-			load4FactorsImages(myGame);
-		} else if(page_num == ADV_BOX_SCORE) {
-			loadBoxImages(myGame, true);
-			loadAdvBoxFrag(false);
-			connectTeamButtons(getView(), true);
-			updateButtonInfo(null, true);
-		} else if(page_num == BOX_SCORE) {
-			loadBoxImages(myGame, false);
-			loadBoxFrag(false);
-			connectTeamButtons(getView(), false);
-			updateButtonInfo(null, false);
+		if(!destroyed) {
+			Log.d(TAG, "ArchivedGameFragment : loadImages : Calling the update functions!");
+			if(page_num == FOUR_FACTORS) {
+				load4FactorsImages(myGame);
+			} else if(page_num == ADV_BOX_SCORE) {
+				loadBoxImages(myGame, true);
+				loadAdvBoxFrag(false);
+				connectTeamButtons(getView(), true);
+				updateButtonInfo(null, true);
+			} else if(page_num == BOX_SCORE) {
+				loadBoxImages(myGame, false);
+				loadBoxFrag(false);
+				connectTeamButtons(getView(), false);
+				updateButtonInfo(null, false);
+			}
+		} else {
+			Log.d(TAG, "ArchivedGameFragment has been destroyed, skipping update functions!");
 		}
 	}
 	
@@ -391,6 +417,13 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 	}
 	
 	private void loadBoxImages(BasketballGame myGame, boolean adv) {
+		
+		Log.d(TAG, "inside loadBoxImages...for PAGE_NUM = " + getArguments().getInt(PAGE_NUM));
+		//Log.d(TAG, "ArchivedGameFragment.isVisible() = " + this.isVisible());
+		//Log.d(TAG, "Parent Activity = " + this.getActivity());
+		//if(this.getActivity() != null) {
+		//	Log.d(TAG, "Parent Activity isDestroyed() = " + this.getActivity().isDestroyed());
+		//}
 		
 		int pixels = NBAStatStream.dpToPx(50.0f);
 		ImageView homeImageView;
