@@ -79,23 +79,29 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		super.onPostExecute(result);
 		// Add the Game/Event view to the Events View
 		if(activityReference != null && activityReference.get() != null) {
-			//progress.setVisibility(View.GONE);
-			if(parentViewReference != null && result != null) {
-				final ViewGroup parentView = parentViewReference.get();
-				if(parentView != null) {
-					if((PAGE_NUM == ArchivedGameFragment.ADV_BOX_SCORE || PAGE_NUM == ArchivedGameFragment.BOX_SCORE) && parentView.getChildCount() != 0) {
-						Log.d(TAG, "BOX_SCORE! Removing old view before adding result");
-						parentView.removeViewAt(0);
-						parentView.addView(result, 0);
+			Log.d(TAG, "activityReference = " + activityReference.get() + ", isDestroyed = " + activityReference.get().isDestroyed());
+			if(activityReference.get().isDestroyed() == false) {
+				if(parentViewReference != null && result != null) {
+					final ViewGroup parentView = parentViewReference.get();
+					if(parentView != null) {
+						if((PAGE_NUM == ArchivedGameFragment.ADV_BOX_SCORE || PAGE_NUM == ArchivedGameFragment.BOX_SCORE) && parentView.getChildCount() != 0) {
+							Log.d(TAG, "BOX_SCORE! Removing old view before adding result");
+							parentView.removeViewAt(0);
+							parentView.addView(result, 0);
+						} else {
+							Log.d(TAG, "4Factors! Adding result");
+							parentView.addView(result);
+						}
+						Log.d(TAG, "Calling loadImages from AsyncTask");
+						BoxListener listener = listenerReference.get();
+						listener.loadImages(myGame);
 					} else {
-						Log.d(TAG, "4Factors! Adding result");
-						parentView.addView(result);
+						Log.d(TAG, "GameFragmentUpdateTask : parentView == null for PAGE_NUM = " + PAGE_NUM);
 					}
-					Log.d(TAG, "Calling loadImages from AsyncTask");
-					BoxListener listener = listenerReference.get();
-					listener.loadImages(myGame);
 				}
 			}
+		} else {
+			Log.d(TAG, "GameFragmentUpdateTask : activityReference == null for PAGE_NUM = " + PAGE_NUM);
 		}
 	}
 
@@ -214,7 +220,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		fourFactors.addView(quarterScores);
 
 		// Create the Table Title
-		TextView tableTitle = new TextView(activityReference.get());
+		/*TextView tableTitle = new TextView(activityReference.get());
 		tableTitle.setId(R.id.four_factors_table_title);
 		RelativeLayout.LayoutParams titleParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		titleParams.addRule(RelativeLayout.BELOW, R.id.four_factors_quarter_scores);
@@ -222,37 +228,68 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		tableTitle.setPadding(0, marginTop, 0, 0);
 		tableTitle.setTextSize(50.0f);
 		tableTitle.setText(activityReference.get().getResources().getString(R.string.pager_4factors_title));
-		fourFactors.addView(tableTitle, titleParams);
+		fourFactors.addView(tableTitle, titleParams);*/
 
 		// Create the 4Factors Table
 		TableLayout factorsTable = new TableLayout(activityReference.get());
 		factorsTable.setId(R.id.four_factors_table);
 		RelativeLayout.LayoutParams tableParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		tableParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
-		tableParams.addRule(RelativeLayout.BELOW, R.id.four_factors_table_title);
-		marginLarge = NBAStatStream.dpToPx(15.0f);
+		//tableParams.addRule(RelativeLayout.BELOW, R.id.four_factors_table_title);
+		tableParams.addRule(RelativeLayout.BELOW, R.id.four_factors_quarter_scores);
+		marginLarge = NBAStatStream.dpToPx(25.0f);
 		tableParams.setMargins(0, marginLarge, 0, 0);
 		factorsTable.setBackgroundColor(activityReference.get().getResources().getColor(R.color.WHITE));
+		
+		// Create the Table Title
+		int marginTiny = NBAStatStream.dpToPx(0.5f);
+		int padText = NBAStatStream.dpToPx(3.0f);
+		TableRow tableLabel = new TableRow(activityReference.get());
+		tableLabel.setId(R.id.four_factors_table_title);
+		TextView filler = new TextView(activityReference.get());
+		TableRow.LayoutParams fillerParams = new TableRow.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 3.4f);
+		fillerParams.setMargins(marginTiny, marginTiny, marginTiny, marginTiny);
+		filler.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_LIGHT_SLATE_GRAY));
+		filler.setPadding(padText, padText, padText, padText);
+		filler.setLayoutParams(fillerParams);
+		filler.setTextColor(activityReference.get().getResources().getColor(R.color.ROW_LIGHT_SLATE_GRAY));
+		filler.setTextSize(15.0f);
+		tableLabel.addView(filler);
+		TextView tableTitle = new TextView(activityReference.get());
+		TableRow.LayoutParams titleParams = new TableRow.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 3.6f);
+		titleParams.setMargins(marginTiny, marginTiny, marginTiny, marginTiny);
+		tableTitle.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_LIGHT_SLATE_GRAY));
+		tableTitle.setPadding(padText, padText, padText, padText);
+		tableTitle.setLayoutParams(titleParams);
+		tableTitle.setTextSize(15.0f);
+		tableTitle.setText(activityReference.get().getResources().getString(R.string.pager_4factors_title));
+		tableTitle.setGravity(Gravity.CENTER);
+		tableTitle.setTextColor(activityReference.get().getResources().getColor(R.color.WHITE));
+		tableLabel.addView(tableTitle);
+		factorsTable.addView(tableLabel);
 
 		//
 		// Set up the Title Text Columns
 		//
 		TableRow titleRow = new TableRow(activityReference.get());
+		TableLayout.LayoutParams rowParams = new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		titleRow.setWeightSum(7.0f);
+		titleRow.setLayoutParams(rowParams);
 		titleRow.setId(R.id.four_factors_table_row_title);
 		// Empty Column
-		titleRow = createTableColumn(titleRow, null, 0);
+		titleRow = createTableColumn(titleRow, null, 0, false);
 		// Pace Title
-		titleRow = createTableColumn(titleRow, activityReference.get().getResources().getString(R.string.title_pace), 0);
+		titleRow = createTableColumn(titleRow, activityReference.get().getResources().getString(R.string.title_pace), 0, false);
 		// Efficiency Title
-		titleRow = createTableColumn(titleRow, activityReference.get().getResources().getString(R.string.title_eff), 0);
+		titleRow = createTableColumn(titleRow, activityReference.get().getResources().getString(R.string.title_eff), 0, false);
 		// eFG Title
-		titleRow = createTableColumn(titleRow, activityReference.get().getResources().getString(R.string.title_efg), 0);
+		titleRow = createTableColumn(titleRow, activityReference.get().getResources().getString(R.string.title_efg), 0, false);
 		// FT/FGA Title
-		titleRow = createTableColumn(titleRow, activityReference.get().getResources().getString(R.string.title_ftfg), 0);
+		titleRow = createTableColumn(titleRow, activityReference.get().getResources().getString(R.string.title_ftfg), 0, false);
 		// OREB Title
-		titleRow = createTableColumn(titleRow, activityReference.get().getResources().getString(R.string.title_orebp), 0);
+		titleRow = createTableColumn(titleRow, activityReference.get().getResources().getString(R.string.title_orebp), 0, false);
 		// TO% Title
-		titleRow = createTableColumn(titleRow, activityReference.get().getResources().getString(R.string.title_torp), 0);
+		titleRow = createTableColumn(titleRow, activityReference.get().getResources().getString(R.string.title_torp), 0, false);
 		// Add Row to the Table
 		factorsTable.addView(titleRow);
 
@@ -261,31 +298,39 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		//
 		TableRow awayRow = new TableRow(activityReference.get());
 		TableRow homeRow = new TableRow(activityReference.get());
+		awayRow.setLayoutParams(rowParams);
+		homeRow.setLayoutParams(rowParams);
+		awayRow.setWeightSum(7.0f);
+		homeRow.setWeightSum(7.0f);
 		awayRow.setId(R.id.four_factors_table_row_away);
 		homeRow.setId(R.id.four_factors_table_row_home);
 		//awayRow.setLayoutParams(rowParams);
 		//homeRow.setLayoutParams(rowParams);
+		boolean eFG_high = isWinner(myGame.getEFG(false), myGame.getEFG(true));
+		boolean FTFGA_high = isWinner(myGame.getFTFGA(false), myGame.getFTFGA(true));
+		boolean OREB_high = isWinner(myGame.getOREBP(false), myGame.getOREBP(true));
+		boolean TOV_high = isWinner(myGame.getTOVP(true), myGame.getTOVP(false));
 		// Team Abbreviation
-		awayRow = createTableColumn(awayRow, myGame.AwayTeam.getAbbrev(), 1);
-		homeRow = createTableColumn(homeRow, myGame.HomeTeam.getAbbrev(), 2);
+		awayRow = createTableColumn(awayRow, myGame.AwayTeam.getAbbrev(), 1, false);
+		homeRow = createTableColumn(homeRow, myGame.HomeTeam.getAbbrev(), 2, false);
 		// Pace
-		awayRow = createTableColumn(awayRow, Float.toString(myGame.AwayTeamAdvStats.get(AdvancedStatName.PACE)), 1);
-		homeRow = createTableColumn(homeRow, Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.PACE)), 2);
+		awayRow = createTableColumn(awayRow, Float.toString(myGame.getPace()), 1, false);
+		homeRow = createTableColumn(homeRow, Float.toString(myGame.getPace()), 2, false);
 		// Offensive Efficiency
-		awayRow = createTableColumn(awayRow, Float.toString(myGame.AwayTeamAdvStats.get(AdvancedStatName.OFFEFF)), 1);
-		homeRow = createTableColumn(homeRow, Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.OFFEFF)), 2);
+		awayRow = createTableColumn(awayRow, Float.toString(myGame.getOFFeFF(false)), 1, false);
+		homeRow = createTableColumn(homeRow, Float.toString(myGame.getOFFeFF(true)), 2, false);
 		// eFG%
-		awayRow = createTableColumn(awayRow, Float.toString(myGame.AwayTeamAdvStats.get(AdvancedStatName.EFGPERCENT)), 1);
-		homeRow = createTableColumn(homeRow, Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.EFGPERCENT)), 2);
+		awayRow = createTableColumn(awayRow, Float.toString(myGame.getEFG(false)), 1, !eFG_high);
+		homeRow = createTableColumn(homeRow, Float.toString(myGame.getEFG(true)), 2, eFG_high);
 		// FT/FGA
-		awayRow = createTableColumn(awayRow, Float.toString(myGame.AwayTeamAdvStats.get(AdvancedStatName.FTFGA)), 1);
-		homeRow = createTableColumn(homeRow, Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.FTFGA)), 2);
+		awayRow = createTableColumn(awayRow, Float.toString(myGame.getFTFGA(false)), 1, !FTFGA_high);
+		homeRow = createTableColumn(homeRow, Float.toString(myGame.getFTFGA(true)), 2, FTFGA_high);
 		// Offensive Rebounding %
-		awayRow = createTableColumn(awayRow, Float.toString(myGame.AwayTeamAdvStats.get(AdvancedStatName.OREBPERCENT)), 1);
-		homeRow = createTableColumn(homeRow, Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.OREBPERCENT)), 2);
+		awayRow = createTableColumn(awayRow, Float.toString(myGame.getOREBP(false)), 1, !OREB_high);
+		homeRow = createTableColumn(homeRow, Float.toString(myGame.getOREBP(true)), 2, OREB_high);
 		// Turnover %
-		awayRow = createTableColumn(awayRow, Float.toString(myGame.AwayTeamAdvStats.get(AdvancedStatName.TOPERCENT)), 1);
-		homeRow = createTableColumn(homeRow, Float.toString(myGame.HomeTeamAdvStats.get(AdvancedStatName.TOPERCENT)), 2);
+		awayRow = createTableColumn(awayRow, Float.toString(myGame.getTOVP(false)), 1, !TOV_high);
+		homeRow = createTableColumn(homeRow, Float.toString(myGame.getTOVP(true)), 2, TOV_high);
 		// Add the rows to the table
 		factorsTable.addView(awayRow);
 		factorsTable.addView(homeRow);
@@ -408,9 +453,11 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		buttonLayout = addTeamButton(buttonLayout, true, true);
 
 		// Create the Advanced Box Score TableLayout for the Home and Away Fragments
-		Log.d(TAG, "creating Advanced Box Score Tables.....");
-		createBoxTable(false, true);
-		createBoxTable(true, true);
+		if(activityReference.get().isDestroyed() == false) {
+			Log.d(TAG, "creating Advanced Box Score Tables.....");
+			createBoxTable(false, true);
+			createBoxTable(true, true);
+		}
 
 		return buttonLayout;
 	}
@@ -431,14 +478,16 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		buttonLayout = addTeamButton(buttonLayout, true, false);
 
 		// Create the Advanced Box Score TableLayout for the Home and Away Fragments
-		Log.d(TAG, "creating Box Score Tables.....");
-		createBoxTable(false, false);
-		createBoxTable(true, false);
+		if(activityReference.get().isDestroyed() == false) {
+			Log.d(TAG, "creating Box Score Tables.....");
+			createBoxTable(false, false);
+			createBoxTable(true, false);
+		}
 
 		return buttonLayout;
 	}
 
-	private TableRow createTableColumn(TableRow myRow, String text, int type) {
+	private TableRow createTableColumn(TableRow myRow, String text, int type, boolean highlight) {
 
 		// Padding and Margin
 		int textPad = NBAStatStream.dpToPx(3.0f);
@@ -448,7 +497,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		TextView colText = new TextView(activityReference.get());
 
 		// Layout Parameters
-		TableRow.LayoutParams textParams = new TableRow.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		TableRow.LayoutParams textParams = new TableRow.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1.0f);
 		textParams.setMargins(textMargin, textMargin, textMargin, textMargin);
 
 		// Set up the TextView
@@ -457,9 +506,11 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 			colText.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_LIGHT_SLATE_GRAY));
 			colText.setTextColor(activityReference.get().getResources().getColor(R.color.WHITE));
 		} else if(type == 1) { // Away Row
-			colText.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_GRAY));
+			if(highlight) { colText.setBackgroundColor(activityReference.get().getResources().getColor(R.color.HIGHLIGHT_YELLOW)); }
+			else { colText.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_GRAY)); }
 		} else { // Home Row
-			colText.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_LIGHT_GRAY));
+			if(highlight) { colText.setBackgroundColor(activityReference.get().getResources().getColor(R.color.HIGHLIGHT_YELLOW)); }
+			else { colText.setBackgroundColor(activityReference.get().getResources().getColor(R.color.ROW_LIGHT_GRAY)); }
 		}
 		colText.setTextSize(15.0f);
 		colText.setText(text);
@@ -913,5 +964,13 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		DecimalFormat threeZeroes = new DecimalFormat("#0.000");
 		String result = threeZeroes.format(num);
 		return result;
+	}
+	
+	// Returns true if the home team was the better stat
+	// Requires the arguments passed in order: (away, home)
+	//  - Except for TOV% because lower is better so pass as (home, away)
+	//    to get correct result.
+	private boolean isWinner(float away, float home) {
+		return (home > away);
 	}
 }
