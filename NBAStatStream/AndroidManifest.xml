@@ -4,11 +4,16 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 
+    <instrumentation 
+        android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="com.jitix.nbastatstream" />
+    -->
     <uses-sdk
         android:minSdkVersion="17"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="19" />
 
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -37,6 +42,8 @@
             android:screenOrientation="portrait"
         	android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
+        
+        <uses-library android:name="android.test.runner"/>
     </application>
 
 </manifest>
