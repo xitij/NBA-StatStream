@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <item name="empty_game_view" type="id" />
     <item name="four_factors_view" type="id" />
     <item name="four_factors_date" type="id" />
     <item name="four_factors_home_logo" type="id" />
