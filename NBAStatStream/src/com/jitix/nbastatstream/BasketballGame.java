@@ -78,6 +78,63 @@ public class BasketballGame {
 	Map<AdvancedStatName, Float>		HomeTeamAdvStats = new EnumMap<AdvancedStatName, Float>(AdvancedStatName.class);
 	Map<AdvancedStatName, Float>		AwayTeamAdvStats = new EnumMap<AdvancedStatName, Float>(AdvancedStatName.class);
 	
+	// Helper functions to get the Advanced Stats
+	public float getPoss() {
+			return HomeTeamAdvStats.get(AdvancedStatName.POSS);
+	}
+	
+	public float getPace() {
+			return HomeTeamAdvStats.get(AdvancedStatName.PACE);
+	}
+	
+	public float getOFFeFF(boolean home) {
+		if(home) {
+			return HomeTeamAdvStats.get(AdvancedStatName.OFFEFF);
+		} else {
+			return AwayTeamAdvStats.get(AdvancedStatName.OFFEFF);
+		}
+	}
+	
+	public float getDEFeFF(boolean home) {
+		if(home) {
+			return HomeTeamAdvStats.get(AdvancedStatName.DEFEFF);
+		} else {
+			return AwayTeamAdvStats.get(AdvancedStatName.DEFEFF);
+		}
+	}
+	
+	public float getEFG(boolean home) {
+		if(home) {
+			return HomeTeamAdvStats.get(AdvancedStatName.EFGPERCENT);
+		} else {
+			return AwayTeamAdvStats.get(AdvancedStatName.EFGPERCENT);
+		}
+	}
+	
+	public float getTOVP(boolean home) {
+		if(home) {
+			return HomeTeamAdvStats.get(AdvancedStatName.TOPERCENT);
+		} else {
+			return AwayTeamAdvStats.get(AdvancedStatName.TOPERCENT);
+		}
+	}
+	
+	public float getOREBP(boolean home) {
+		if(home) {
+			return HomeTeamAdvStats.get(AdvancedStatName.OREBPERCENT);
+		} else {
+			return AwayTeamAdvStats.get(AdvancedStatName.OREBPERCENT);
+		}
+	}
+	
+	public float getFTFGA(boolean home) {
+		if(home) {
+			return HomeTeamAdvStats.get(AdvancedStatName.FTFGA);
+		} else {
+			return AwayTeamAdvStats.get(AdvancedStatName.FTFGA);
+		}
+	}
+	
 	//
 	// Public function that is called to populate all the game information and stats.
 	// This function will call all the helper functions to populate and calculate different
