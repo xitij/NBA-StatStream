@@ -49,7 +49,7 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 	@Override
 	protected RelativeLayout doInBackground(Event... params) {
 		myEvent = params[0];
-		
+		Log.d(TAG, "CalendarUpdateTask running doInBackground for eventID = " + myEvent.getEventId());
 		if(activityReference != null) {
 			return updateGameView(myEvent);
 		} else {
@@ -67,7 +67,7 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 				if(parentView != null) {
 					parentView.addView(result);
 					Log.d(TAG, "Added View with ID = " + eventId);
-					Log.d(TAG, "Calling loadImages from AsyncTask");
+					//Log.d(TAG, "Calling loadImages from AsyncTask");
 					TaskListener listener = (TaskListener) activityReference.get();
 					listener.loadImages(myEvent, eventId);
 				}
@@ -239,11 +239,11 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 			int timeID = event_id + 9000;
 			eventTime.setId(timeID);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
-			Log.d(TAG, "Game time before parse = " + event.getStartDateTime());
+			//Log.d(TAG, "Game time before parse = " + event.getStartDateTime());
 			Date date;
 			try {
 				date = sdf.parse(event.getStartDateTime());
-				Log.d(TAG, "After parse = " + date);
+				//Log.d(TAG, "After parse = " + date);
 				DateFormat df = DateFormat.getTimeInstance();
 				String stringDate = df.format(date);
 				eventTime.setText(stringDate.split(" ")[0].substring(0, stringDate.split(" ")[0].length() - 3) + " " + stringDate.split(" ")[1]);
