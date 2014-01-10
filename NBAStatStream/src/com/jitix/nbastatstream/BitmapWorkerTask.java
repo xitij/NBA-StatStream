@@ -28,6 +28,7 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
 	// Decode the image in the background
 	@Override
 	protected Bitmap doInBackground(Integer... params) {
+		Log.d(TAG, "BitmapWorkerTask running doInBackground for imageView = " + imageViewReference.get().getId());
 		data = params[0];
 		int width = params[1];
 		int height = params[2];
@@ -45,6 +46,7 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
 			final ImageView imageView = imageViewReference.get();
 			if(imageView != null) {
 				imageView.setImageBitmap(bitmap);
+				Log.d(TAG, "BitmapWorkerTask adding bitmap to imageView = " + imageViewReference.get().getId());
 				// If this is the last image that is loaded, clear the progress bar
 				if(last == true) {
 					Log.d(TAG, "Calling hideProgress");
