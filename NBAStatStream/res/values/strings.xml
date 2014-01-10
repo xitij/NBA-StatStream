@@ -79,5 +79,13 @@
     <string name="raptors">Raptors</string>
     <string name="jazz">Jazz</string>
     <string name="wizards">Wizards</string>
+    
+    <string-array 
+        name="drawer_layout_items">
+        <item>Schedule</item>
+        <item>Standings</item>
+        <item>League Leaders</item>
+        <item>Team Stats</item>
+    </string-array>
 
 </resources>
