@@ -15,6 +15,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.DrawerLayout;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
@@ -24,12 +25,14 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
@@ -47,8 +50,9 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 
 	private static final String TAG = "NBAStatStream";
 	private static final String NO_GAME_RESULTS = "NO_RESULTS";
-	public static final float SCALE = Resources.getSystem().getDisplayMetrics().density;
+	private static final float SCALE = Resources.getSystem().getDisplayMetrics().density;
 	
+	// Class to hold team specific info
 	class TeamInfo {
 		String 	abbrev;
 		int 	image_resource;
@@ -562,7 +566,8 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 
 					// Create an UpdateCalendarUITask to update the UI
 					CalendarUpdateTask calendarTask = new CalendarUpdateTask(this, eventsView, i);
-					calendarTask.execute(event);
+					//calendarTask.execute(event);
+					calendarTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, event);
 					i++;
 				}
 			} catch(IOException e) {
@@ -576,11 +581,9 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		
 		// Determine if this is the last event to load the images for (used to remove progress bar)
 		boolean lastEvent = (myEvents.getEventList().size() - 1) == id;
-		Log.d(TAG, "lastEvent = " + lastEvent + ", for event = " + event);
+		//Log.d(TAG, "lastEvent = " + lastEvent + ", for event = " + event);
 		
 		// Set the Image size
-		final float scale = getBaseContext().getResources().getDisplayMetrics().density;
-		//int pixels = (int) (40.0f * scale + 40.0f);
 		int pixels = dpToPx(60.0f);
 		
 		// Get the Away ImageView and resource ID
@@ -745,7 +748,8 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 	
 	private void loadBitmap(int resId, ImageView imageView, int width, int height, boolean last) {
 		BitmapWorkerTask task = new BitmapWorkerTask(this, imageView, last);
-		task.execute(resId, width, height);
+		//task.execute(resId, width, height);
+		task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resId, width, height);
 	}
 	
 	private String getMonthString(int month) {
