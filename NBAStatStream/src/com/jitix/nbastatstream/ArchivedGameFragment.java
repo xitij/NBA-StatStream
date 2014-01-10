@@ -7,6 +7,7 @@ import com.jitix.nbastatstream.NBAStatStream.TeamInfo;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -340,7 +341,8 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 		//GameFragmentUpdateTask updateTask = new GameFragmentUpdateTask(this.getActivity(), this, myGame, (ViewGroup) getView(), progress);
 		GameFragmentUpdateTask updateTask = new GameFragmentUpdateTask(this.getActivity(), this, myGame, (ViewGroup) getView().findViewById(R.id.pager_4factors_layout));
 		Bundle args = getArguments();
-		updateTask.execute(args.getInt(PAGE_NUM));
+		//updateTask.execute(args.getInt(PAGE_NUM));
+		updateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args.getInt(PAGE_NUM));
 	}
 	
 	public void updateBox(BasketballGame myGame) {
@@ -349,7 +351,8 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 		GameFragmentUpdateTask updateTask = new GameFragmentUpdateTask(this.getActivity(), this, myGame, (ViewGroup) getView().findViewById(R.id.pager_box_layout));
 		Bundle args = getArguments();
 		Log.d(TAG, "inside updateBox Page num = " + args.getInt(PAGE_NUM));
-		updateTask.execute(args.getInt(PAGE_NUM));
+		//updateTask.execute(args.getInt(PAGE_NUM));
+		updateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args.getInt(PAGE_NUM));
 	}
 
 	public void updateAdvBox(BasketballGame myGame) {
@@ -358,7 +361,8 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 		GameFragmentUpdateTask updateTask = new GameFragmentUpdateTask(this.getActivity(), this, myGame, (ViewGroup) getView().findViewById(R.id.pager_advbox_layout));
 		Bundle args = getArguments();
 		Log.d(TAG, "inside updateAdvBox Page num = " + args.getInt(PAGE_NUM));
-		updateTask.execute(args.getInt(PAGE_NUM));
+		//updateTask.execute(args.getInt(PAGE_NUM));
+		updateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args.getInt(PAGE_NUM));
 	}
 	
 	public void updateShotChart(BasketballGame myGame) {
