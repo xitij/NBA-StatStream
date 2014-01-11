@@ -184,11 +184,11 @@ public class ArchivedGame extends FragmentActivity implements TaskListener {
 				// Update all the Fragments and Views
 				//
 				ArchivedGameFragment fourFactorfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(0);
-				fourFactorfrag.update4Factors(this.myGame);
+				fourFactorfrag.update4Factors(ArchivedGame.myGame);
 				ArchivedGameFragment boxfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(1);
-				boxfrag.updateBox(this.myGame);
+				boxfrag.updateBox(ArchivedGame.myGame);
 				ArchivedGameFragment advBoxfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(2);
-				advBoxfrag.updateAdvBox(this.myGame);
+				advBoxfrag.updateAdvBox(ArchivedGame.myGame);
 				//ArchivedGameFragment shotfrag = (ArchivedGameFragment) archivedGamePagerAdapter.getFrag(2);
 				//shotfrag.updateShotChart(this.myGame);
 				
