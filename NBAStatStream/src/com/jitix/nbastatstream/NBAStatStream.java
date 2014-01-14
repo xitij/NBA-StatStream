@@ -1,69 +1,36 @@
 package com.jitix.nbastatstream;
 
 import java.util.Calendar;
-import java.util.Hashtable;
-import java.util.Map;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.DatePickerDialog;
-import android.app.Notification.Style;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.DrawerLayout;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.text.ParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class NBAStatStream extends FragmentActivity implements TaskListener, OnClickListener, DatePickerDialog.OnDateSetListener {
 
 	private static final String TAG = "NBAStatStream";
 	private static final String NO_GAME_RESULTS = "NO_RESULTS";
 	private static final float SCALE = Resources.getSystem().getDisplayMetrics().density;
-	
-	// Class to hold team specific info
-	class TeamInfo {
-		String 	abbrev;
-		int 	image_resource;
-		int		color_main;
-		int 	color_secondary;
-	}
-	
-	// Map to hold the Team information
-	// Key = Team full name (ex. Detroit Pistons)
-	// Object = TeamInfo class
-	public static final Map<String, TeamInfo> NBATeamInfo = new Hashtable<String, TeamInfo>();
 	
 	// Progress Bar
 	private static ProgressBar progress;
@@ -76,6 +43,11 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		
 		Log.d(TAG, "NBAStatStream onCreate!");
 		Log.d(TAG, "Scale = " + SCALE);
+		
+		int size = ((NBATeamInfo) getApplicationContext()).getNBATeamInfoSize();
+		if(size != 32) {
+			((NBATeamInfo) getApplicationContext()).setNBATeamInfo();
+		}
 		
 		///////////////////////////////////////////////////////////////////
 		// Setup the calendar layout 
@@ -110,238 +82,8 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		String monthString = getMonthString(month);
 		progress.setVisibility(View.VISIBLE);
 		new GameDownloader(this, this).execute(year.toString(), monthString, day.toString());
-		
-		initializeTeamInfo();
 	}
 
-	private void initializeTeamInfo() {
-		// 30 NBA teams
-		TeamInfo team = new TeamInfo();
-		team.abbrev = "ATL";
-		team.image_resource = R.drawable.atl_logo;
-		team.color_main = R.color.HAWKS_RED;
-		team.color_secondary = R.color.HAWKS_BLUE;
-		NBATeamInfo.put("Atlanta Hawks", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "BOS";
-		team.image_resource = R.drawable.bos_logo;
-		team.color_main = R.color.CELTICS_GREEN;
-		team.color_secondary = R.color.CELTICS_WHITE;
-		NBATeamInfo.put("Boston Celtics", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "BRK";
-		team.image_resource = R.drawable.brk_logo;
-		team.color_main = R.color.NETS_BLACK;
-		team.color_secondary = R.color.NETS_WHITE;
-		NBATeamInfo.put("Brooklyn Nets", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "CHA";
-		team.image_resource = R.drawable.cha_logo;
-		team.color_main = R.color.BOBCATS_NAVY;
-		team.color_secondary = R.color.BOBCATS_ORANGE;
-		NBATeamInfo.put("Charlotte Bobcats", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "CHI";
-		team.image_resource = R.drawable.chi_logo;
-		team.color_main = R.color.BULLS_RED;
-		team.color_secondary = R.color.BULLS_BLACK;
-		NBATeamInfo.put("Chicago Bulls", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "CLE";
-		team.image_resource = R.drawable.cle_logo;
-		team.color_main = R.color.CAVS_RED;
-		team.color_secondary = R.color.CAVS_YELLOW;
-		NBATeamInfo.put("Cleveland Cavaliers", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "DAL";
-		team.image_resource = R.drawable.dal_logo;
-		team.color_main = R.color.MAVS_LIGHT_BLUE;
-		team.color_secondary = R.color.MAVS_DARK_BLUE;
-		NBATeamInfo.put("Dallas Mavericks", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "DEN";
-		team.image_resource = R.drawable.den_logo;
-		team.color_main = R.color.NUGGETS_LIGHT_BLUE;
-		team.color_secondary = R.color.NUGGETS_GOLD;
-		NBATeamInfo.put("Denver Nuggets", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "DET";
-		team.image_resource = R.drawable.det_logo;
-		team.color_main = R.color.PISTONS_BLUE;
-		team.color_secondary = R.color.PISTONS_RED;
-		NBATeamInfo.put("Detroit Pistons", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "GS";
-		team.image_resource = R.drawable.gs_logo;
-		team.color_main = R.color.WARRIORS_YELLOW;
-		team.color_secondary = R.color.WARRIORS_BLUE;
-		NBATeamInfo.put("Golden State Warriors", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "HOU";
-		team.image_resource = R.drawable.hou_logo;
-		team.color_main = R.color.ROCKETS_RED;
-		team.color_secondary = R.color.ROCKETS_SILVER;
-		NBATeamInfo.put("Houston Rockets", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "IND";
-		team.image_resource = R.drawable.ind_logo;
-		team.color_main = R.color.PACERS_YELLOW;
-		team.color_secondary = R.color.PACERS_BLUE;
-		NBATeamInfo.put("Indiana Pacers", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "LAC";
-		team.image_resource = R.drawable.lac_logo;
-		team.color_main = R.color.CLIPPERS_RED;
-		team.color_secondary = R.color.CLIPPERS_BLUE;
-		NBATeamInfo.put("Los Angeles Clippers", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "LAL";
-		team.image_resource = R.drawable.lal_logo;
-		team.color_main = R.color.LAKERS_PURPLE;
-		team.color_secondary = R.color.LAKERS_YELLOW;
-		NBATeamInfo.put("Los Angeles Lakers", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "MEM";
-		team.image_resource = R.drawable.mem_logo;
-		team.color_main = R.color.GRIZZLIES_DARK_BLUE;
-		team.color_secondary = R.color.GRIZZLIES_SKY_BLUE;
-		NBATeamInfo.put("Memphis Grizzlies", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "MIA";
-		team.image_resource = R.drawable.mia_logo;
-		team.color_main = R.color.HEAT_RED;
-		team.color_secondary = R.color.HEAT_BLACK;
-		NBATeamInfo.put("Miami Heat", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "MIL";
-		team.image_resource = R.drawable.mil_logo;
-		team.color_main = R.color.BUCKS_GREEN;
-		team.color_secondary = R.color.BUCKS_RED;
-		NBATeamInfo.put("Milwaukee Bucks", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "MIN";
-		team.image_resource = R.drawable.min_logo;
-		team.color_main = R.color.TWOLVES_BLUE;
-		team.color_secondary = R.color.TWOLVES_GREEN;
-		NBATeamInfo.put("Minnesota Timberwolves", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "NJ";
-		team.image_resource = R.drawable.nj_logo;
-		team.color_main = R.color.NETS_NAVY_BLUE;
-		team.color_secondary = R.color.NETS_RED;
-		NBATeamInfo.put("New Jersey Nets", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "NOR";
-		team.image_resource = R.drawable.nor_hor_logo;
-		team.color_main = R.color.HORNETS_TEAL;
-		team.color_secondary = R.color.HORNETS_PURPLE;
-		NBATeamInfo.put("New Orleans Hornets", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "NOR";
-		team.image_resource = R.drawable.nor_logo;
-		team.color_main = R.color.PELICANS_DARK_BLUE;
-		team.color_secondary = R.color.PELICANS_GOLD;
-		NBATeamInfo.put("New Orleans Pelicans", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "NY";
-		team.image_resource = R.drawable.ny_logo;
-		team.color_main = R.color.KNICKS_ORANGE;
-		team.color_secondary = R.color.KNICKS_BLUE;
-		NBATeamInfo.put("New York Knicks", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "OKC";
-		team.image_resource = R.drawable.okc_logo;
-		team.color_main = R.color.THUNDER_BLUE;
-		team.color_secondary = R.color.THUNDER_ORANGE;
-		NBATeamInfo.put("Oklahoma City Thunder", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "ORL";
-		team.image_resource = R.drawable.orl_logo;
-		team.color_main = R.color.MAGIC_BLUE;
-		team.color_secondary = R.color.MAGIC_GRAY;
-		NBATeamInfo.put("Orlando Magic", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "PHI";
-		team.image_resource = R.drawable.phi_logo;
-		team.color_main = R.color.SIXERS_BLUE;
-		team.color_secondary = R.color.SIXERS_RED;
-		NBATeamInfo.put("Philadelphia 76ers", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "PHO";
-		team.image_resource = R.drawable.pho_logo;
-		team.color_main = R.color.SUNS_ORANGE;
-		team.color_secondary = R.color.SUNS_BLACK;
-		NBATeamInfo.put("Phoenix Suns", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "POR";
-		team.image_resource = R.drawable.por_logo;
-		team.color_main = R.color.BLAZERS_RED;
-		team.color_secondary = R.color.BLAZERS_BLACK;
-		NBATeamInfo.put("Portland Trail Blazers", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "SAC";
-		team.image_resource = R.drawable.sac_logo;
-		team.color_main = R.color.KINGS_PURPLE;
-		team.color_secondary = R.color.KINGS_GRAY;
-		NBATeamInfo.put("Sacramento Kings", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "SA";
-		team.image_resource = R.drawable.sa_logo;
-		team.color_main = R.color.SPURS_SILVER;
-		team.color_secondary = R.color.SPURS_BLACK;
-		NBATeamInfo.put("San Antonio Spurs", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "TOR";
-		team.image_resource = R.drawable.tor_logo;
-		team.color_main = R.color.RAPTORS_RED;
-		team.color_secondary = R.color.RAPTORS_BLACK;
-		NBATeamInfo.put("Toronto Raptors", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "UTA";
-		team.image_resource = R.drawable.uta_logo;
-		team.color_main = R.color.JAZZ_BLUE;
-		team.color_secondary = R.color.JAZZ_YELLOW;
-		NBATeamInfo.put("Utah Jazz", team);
-		
-		team = new TeamInfo();
-		team.abbrev = "WAS";
-		team.image_resource = R.drawable.was_logo;
-		team.color_main = R.color.WIZARDS_RED;
-		team.color_secondary = R.color.WIZARDS_BLUE;
-		NBATeamInfo.put("Washington Wizards", team);
-	}
-	
-	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -499,7 +241,6 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 			
 			// Create the unique event_id for the view
 			int event_id = Integer.parseInt(event.getEventId().split("-")[0]) + game_idx;
-			Log.d(TAG, "Trying to match event_id = " + event_id);
 
 			//
 			// Check if user selected one of the events
@@ -566,12 +307,13 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 
 					// Create an UpdateCalendarUITask to update the UI
 					CalendarUpdateTask calendarTask = new CalendarUpdateTask(this, eventsView, i);
-					//calendarTask.execute(event);
-					calendarTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, event);
+					calendarTask.execute(event);
+					//calendarTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, event);
 					i++;
 				}
 			} catch(IOException e) {
 				Log.d(TAG, "downloadedGames : IOException : " + e.getMessage());
+				e.printStackTrace();
 			}
 		}
 	}
@@ -581,7 +323,6 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		
 		// Determine if this is the last event to load the images for (used to remove progress bar)
 		boolean lastEvent = (myEvents.getEventList().size() - 1) == id;
-		//Log.d(TAG, "lastEvent = " + lastEvent + ", for event = " + event);
 		
 		// Set the Image size
 		int pixels = dpToPx(60.0f);
@@ -589,14 +330,12 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		// Get the Away ImageView and resource ID
 		int eventViewId = Integer.parseInt(event.getEventId().split("-")[0]) + id;
 		ImageView awayImageView = (ImageView) findViewById(eventViewId + 1000);
-		//Log.d(TAG, "Using Base Event View id = " + eventViewId + ", ImageView ID = " + (eventViewId + 1000));
-		int awayLogo = getTeamLogo(event.getAwayTeam().getFullName());
+		int awayLogo = ((NBATeamInfo) getApplicationContext()).getTeamLogo(event.getAwayTeam().getFullName());
 		loadBitmap(awayLogo, awayImageView, pixels, pixels, false);
 		
 		// Get the Home ImageView and resource ID
 		ImageView homeImageView = (ImageView) findViewById(eventViewId + 3000);
-		//Log.d(TAG, "Using Base Event View id = " + eventViewId + ", ImageView ID = " + (eventViewId + 3000));
-		int homeLogo = getTeamLogo(event.getHomeTeam().getFullName());
+		int homeLogo = ((NBATeamInfo) getApplicationContext()).getTeamLogo(event.getHomeTeam().getFullName());
 		loadBitmap(homeLogo, homeImageView, pixels, pixels, lastEvent);
 	}
 
@@ -709,36 +448,6 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		return emptyView;
 	}
 	
-	public static int getTeamColor(String teamName, boolean primary) {
-		int teamColor;
-		
-		TeamInfo myTeam = NBATeamInfo.get(teamName);
-		if(myTeam != null) {
-			if(primary) {
-				teamColor = myTeam.color_main;
-			} else {
-				teamColor = myTeam.color_secondary;
-			}
-		} else {
-			Log.d(TAG, "NBAStatStream : getTeamColor : couldn't find team = " + teamName);
-			teamColor = R.color.BLACK;
-		}
-		return teamColor;
-	}
-	
-	public static int getTeamLogo(String teamName) {
-		int teamLogo;
-		
-		TeamInfo myTeam = NBATeamInfo.get(teamName);
-		if(myTeam != null) {
-			teamLogo = myTeam.image_resource;
-		} else {
-			Log.d(TAG, "NBAStatStream : getTeamLogo : couldn't find team = " + teamName);
-			teamLogo = R.drawable.was_logo;
-		}
-		return teamLogo;
-	}
-	
 	private void updateDateButton(int year, int month, int day) {
 		// Set the selected date on the button
 		Button dateButton = (Button) findViewById(R.id.calendar_date_picker);
@@ -748,8 +457,8 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 	
 	private void loadBitmap(int resId, ImageView imageView, int width, int height, boolean last) {
 		BitmapWorkerTask task = new BitmapWorkerTask(this, imageView, last);
-		//task.execute(resId, width, height);
-		task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resId, width, height);
+		task.execute(resId, width, height);
+		//task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resId, width, height);
 	}
 	
 	private String getMonthString(int month) {
