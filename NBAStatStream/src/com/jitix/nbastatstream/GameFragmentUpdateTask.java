@@ -5,20 +5,16 @@ import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import com.jitix.nbastatstream.BasketballGame.AdvancedStatName;
 import com.jitix.nbastatstream.BasketballGame.StatName;
-import com.jitix.nbastatstream.NBAStatStream.TeamInfo;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils.TruncateAt;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
@@ -26,7 +22,6 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -79,20 +74,19 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		super.onPostExecute(result);
 		// Add the Game/Event view to the Events View
 		if(activityReference != null && activityReference.get() != null) {
-			Log.d(TAG, "activityReference = " + activityReference.get() + ", isDestroyed = " + activityReference.get().isDestroyed());
 			if(activityReference.get().isDestroyed() == false) {
 				if(parentViewReference != null && result != null) {
 					final ViewGroup parentView = parentViewReference.get();
 					if(parentView != null) {
 						if((PAGE_NUM == ArchivedGameFragment.ADV_BOX_SCORE || PAGE_NUM == ArchivedGameFragment.BOX_SCORE) && parentView.getChildCount() != 0) {
-							Log.d(TAG, "BOX_SCORE! Removing old view before adding result");
+							//Log.d(TAG, "BOX_SCORE! Removing old view before adding result");
 							parentView.removeViewAt(0);
 							parentView.addView(result, 0);
 						} else {
-							Log.d(TAG, "4Factors! Adding result");
+							//Log.d(TAG, "4Factors! Adding result");
 							parentView.addView(result);
 						}
-						Log.d(TAG, "Calling loadImages from AsyncTask");
+						//Log.d(TAG, "Calling loadImages from AsyncTask");
 						BoxListener listener = listenerReference.get();
 						listener.loadImages(myGame);
 					} else {
@@ -204,7 +198,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 			awayScore.setTextColor(activityReference.get().getResources().getColor(R.color.HIGHLIGHT_BLUE));
 			awayScore.setShadowLayer(1, 1, 1, activityReference.get().getResources().getColor(R.color.BLACK));
 		}
-		
+
 		// Create the Quarter Score Table
 		TableLayout quarterScores = new TableLayout(activityReference.get());
 		quarterScores.setId(R.id.four_factors_quarter_scores);
@@ -240,7 +234,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		marginLarge = NBAStatStream.dpToPx(25.0f);
 		tableParams.setMargins(0, marginLarge, 0, 0);
 		factorsTable.setBackgroundColor(activityReference.get().getResources().getColor(R.color.WHITE));
-		
+
 		// Create the Table Title
 		int marginTiny = NBAStatStream.dpToPx(0.5f);
 		int padText = NBAStatStream.dpToPx(3.0f);
@@ -348,7 +342,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		TableLayout.LayoutParams rowParams = new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		TableRow.LayoutParams textParams = new TableRow.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1.0f);
 		textParams.setMargins(marginSmall, marginSmall, marginSmall, marginSmall);
-		
+
 		// Add the Title Row
 		TableRow titleRow = new TableRow(activityReference.get());
 		titleRow.setLayoutParams(rowParams);
@@ -375,7 +369,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		total.setTextColor(activityReference.get().getResources().getColor(R.color.WHITE));
 		total.setText(R.string.total_score_text);
 		titleRow.addView(total);
-		
+
 		// Add the Away Row
 		TableRow awayRow = new TableRow(activityReference.get());
 		awayRow.setLayoutParams(rowParams);
@@ -402,7 +396,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		awayTotal.setLayoutParams(textParams);
 		awayTotal.setPadding(paddingSmall, paddingSmall, paddingSmall, paddingSmall);
 		awayRow.addView(awayTotal);
-		
+
 		// Add the Home Row
 		TableRow homeRow = new TableRow(activityReference.get());
 		homeRow.setLayoutParams(rowParams);
@@ -429,18 +423,18 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		homeTotal.setLayoutParams(textParams);
 		homeTotal.setPadding(paddingSmall, paddingSmall, paddingSmall, paddingSmall);
 		homeRow.addView(homeTotal);
-		
+
 		quarterScores.addView(titleRow);
 		quarterScores.addView(awayRow);
 		quarterScores.addView(homeRow);
-		
+
 		return quarterScores;
 	}
 
 	private LinearLayout updateAdvBox() {
 
 		Log.d(TAG, "GameFragmentUpdateTask : updateAdvBox ...");
-		
+
 		// Create the Button interface for the Advanced Box Score Fragment
 		LinearLayout buttonLayout = new LinearLayout(activityReference.get());
 		LinearLayout.LayoutParams interfaceParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
@@ -453,19 +447,24 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		buttonLayout = addTeamButton(buttonLayout, true, true);
 
 		// Create the Advanced Box Score TableLayout for the Home and Away Fragments
-		if(activityReference.get().isDestroyed() == false) {
-			Log.d(TAG, "creating Advanced Box Score Tables.....");
-			createBoxTable(false, true);
-			createBoxTable(true, true);
+		if(activityReference != null && activityReference.get() != null) {
+			if(activityReference.get().isDestroyed() == false) {
+				//Log.d(TAG, "creating Advanced Box Score Tables.....");
+				createBoxTable(false, true);
+				createBoxTable(true, true);
+			}
+		} else {
+			Log.d(TAG, "activityReference == null");
 		}
+		
 
 		return buttonLayout;
 	}
-	
+
 	private LinearLayout updateBox() {
 
 		Log.d(TAG, "GameFragmentUpdateTask : updateBox ...");
-		
+
 		// Create the Button interface for the Advanced Box Score Fragment
 		LinearLayout buttonLayout = new LinearLayout(activityReference.get());
 		LinearLayout.LayoutParams interfaceParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
@@ -478,10 +477,14 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		buttonLayout = addTeamButton(buttonLayout, true, false);
 
 		// Create the Advanced Box Score TableLayout for the Home and Away Fragments
-		if(activityReference.get().isDestroyed() == false) {
-			Log.d(TAG, "creating Box Score Tables.....");
-			createBoxTable(false, false);
-			createBoxTable(true, false);
+		if(activityReference != null && activityReference.get() != null) {
+			if(activityReference.get().isDestroyed() == false) {
+				//Log.d(TAG, "creating Box Score Tables.....");
+				createBoxTable(false, false);
+				createBoxTable(true, false);
+			}
+		} else {
+			Log.d(TAG, "activityReference == null");
 		}
 
 		return buttonLayout;
@@ -544,7 +547,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		//LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		RelativeLayout.LayoutParams textParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		textParams.setMargins(marginSmall, marginSmall, marginSmall, marginSmall);
-		
+
 		// ImageView for the Team Color
 		ImageView teamColor = new ImageView(activityReference.get());
 		int linePixels = NBAStatStream.dpToPx(8.0f);
@@ -554,13 +557,14 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 
 		// Set the IDs and text
 		Spannable span;
+		NBATeamInfo myTeamInfo = ((NBATeamInfo) activityReference.get().getApplicationContext());
 		if(home) {
 			//Resources resoures = activityReference.get().getResources();
 			teamButton.setId(adv ? R.id.adv_box_home_team_button : R.id.box_home_team_button);
 			teamLogo.setId(adv ? R.id.adv_box_home_team_logo : R.id.box_home_team_logo);
 			teamName.setId(adv ? R.id.adv_box_home_team_name : R.id.box_home_team_name);
 			teamColor.setId(adv ? R.id.adv_box_home_team_color : R.id.box_home_team_color);
-			teamColor.setBackgroundColor(activityReference.get().getResources().getColor(NBAStatStream.getTeamColor(myGame.HomeTeam.getFullName(), false)));
+			teamColor.setBackgroundColor(activityReference.get().getResources().getColor(myTeamInfo.getTeamColor(myGame.HomeTeam.getFullName(), false)));
 			span = new SpannableString(myGame.HomeTeam.getFirstName() + "\n" + myGame.HomeTeam.getLastName());
 			teamName.setGravity(Gravity.RIGHT);
 			// Set the Params
@@ -574,7 +578,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 			teamLogo.setId(adv ? R.id.adv_box_away_team_logo : R.id.box_away_team_logo);
 			teamName.setId(adv ? R.id.adv_box_away_team_name : R.id.box_away_team_name);
 			teamColor.setId(adv ? R.id.adv_box_away_team_color : R.id.box_away_team_color);
-			teamColor.setBackgroundColor(activityReference.get().getResources().getColor(NBAStatStream.getTeamColor(myGame.AwayTeam.getFullName(), false)));
+			teamColor.setBackgroundColor(activityReference.get().getResources().getColor(myTeamInfo.getTeamColor(myGame.AwayTeam.getFullName(), false)));
 			span = new SpannableString(myGame.AwayTeam.getFirstName() + "\n" + myGame.AwayTeam.getLastName());
 			teamName.setGravity(Gravity.LEFT);
 			// Set the Params
@@ -599,110 +603,115 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 
 	private void createBoxTable(boolean home, boolean adv) {
 
-		Log.d(TAG, "createBoxTable : Advanced Box  = " + adv + ", home = " + home);
-		
-		// Create the ScrollView that will hold the Layout
-		ScrollView box = new ScrollView(activityReference.get());
-		FrameLayout.LayoutParams scrollParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-		box.setLayoutParams(scrollParams);
-		box.setVerticalScrollBarEnabled(true);
-		if(home) {
-			box.setId(adv ? R.id.adv_box_view_home : R.id.box_view_home);
-		} else {
-			box.setId(adv ? R.id.adv_box_view_away : R.id.box_view_away);
-		}
+		//Log.d(TAG, "createBoxTable : Advanced Box  = " + adv + ", home = " + home);
 
-		// Create the LinearLayout that holds the 2 Tables
-		LinearLayout boxTables = new LinearLayout(activityReference.get());
-		ScrollView.LayoutParams tablesLayout = new ScrollView.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-		boxTables.setLayoutParams(tablesLayout);
-		boxTables.setOrientation(LinearLayout.HORIZONTAL);
-		boxTables.setId(adv ? R.id.adv_box_tables : R.id.box_tables);
-
-		//
-		// Create the Table for the Player Names
-		//
-		TableLayout playerTable = new TableLayout(activityReference.get());
-		LinearLayout.LayoutParams namesParams = new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f);
-		playerTable.setLayoutParams(namesParams);
-		playerTable.setBackgroundColor(activityReference.get().getResources().getColor(R.color.WHITE));
-		playerTable.setId(adv ? R.id.adv_box_table_players : R.id.box_table_players);
-		// Create a Table Row for the Title
-		TableRow playerTitle = createPlayerRow(TITLE_ROW, null, 0, home, adv);
-		playerTable.addView(playerTitle);
-
-		//
-		// Create the Horizontal ScrollView that holds the Table for Stats
-		//
-		HorizontalScrollView statsScroll = new HorizontalScrollView(activityReference.get());
-		//LinearLayout.LayoutParams statsScrollParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT, 1.0f);
-		LinearLayout.LayoutParams statsScrollParams = new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f);
-		statsScroll.setLayoutParams(statsScrollParams);
-		statsScroll.setHorizontalScrollBarEnabled(true);
-		// TODO: Stretch
-		statsScroll.setFillViewport(true);
-		statsScroll.setId(adv ? R.id.adv_box_table_stats_scroll : R.id.box_table_stats_scroll);
-		
-		// LinearLayout for the HorizontalScrollView
-		LinearLayout statsLayout = new LinearLayout(activityReference.get());
-		HorizontalScrollView.LayoutParams horiParams = new HorizontalScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-		statsLayout.setLayoutParams(horiParams);
-		statsLayout.setOrientation(LinearLayout.VERTICAL);
-		
-		// Create the Stats Table (it scrolls horizontal)
-		TableLayout statsTable = new TableLayout(activityReference.get());
-		//HorizontalScrollView.LayoutParams statsTableParams = new HorizontalScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-		//TableLayout.LayoutParams statsTableParams = new TableLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-		LinearLayout.LayoutParams statsTableParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-		statsTable.setLayoutParams(statsTableParams);
-		//statsTable.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
-		statsTable.setBackgroundColor(activityReference.get().getResources().getColor(R.color.WHITE));
-		statsTable.setId(adv ? R.id.adv_box_table_stats : R.id.box_table_stats);
-		// Create a Table Row for the Stats Title
-		TableRow statsTitle = createStatsRow(TITLE_ROW, null, 0, home, adv);
-		statsTable.addView(statsTitle);
-		// Create Table Rows for all the Player Stats
-		Iterator<Map.Entry<String, BoxScoreLine>> it;
-		if(home == true) {
-			it = myGame.HomeTeamBox.entrySet().iterator();
-		} else {
-			it = myGame.AwayTeamBox.entrySet().iterator();
-		}
-		int index = 0;
-		while(it.hasNext()) {
-
-			Entry<String, BoxScoreLine> pair = it.next();
-			String name = pair.getKey();
-			BoxScoreLine boxScoreLine = pair.getValue();
-
-			if(boxScoreLine.Minutes != 0) {
-				// Stats row
-				TableRow statsRow = createStatsRow(STATS_ROW, name, index, home, adv);
-				statsTable.addView(statsRow);
-				// Player name row
-				TableRow playerRow = createPlayerRow(STATS_ROW, name, index, home, adv);
-				playerTable.addView(playerRow);
-				index++;
+		try {
+			// Create the ScrollView that will hold the Layout
+			ScrollView box = new ScrollView(activityReference.get());
+			FrameLayout.LayoutParams scrollParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+			box.setLayoutParams(scrollParams);
+			box.setVerticalScrollBarEnabled(true);
+			if(home) {
+				box.setId(adv ? R.id.adv_box_view_home : R.id.box_view_home);
+			} else {
+				box.setId(adv ? R.id.adv_box_view_away : R.id.box_view_away);
 			}
-		}
-		
-		// Add the Tables to the Layout
-		//statsScroll.addView(statsTable);
-		statsLayout.addView(statsTable);
-		statsScroll.addView(statsLayout);
-		boxTables.addView(playerTable);
-		//advBoxTables.addView(statsTable);
-		boxTables.addView(statsScroll);
-		// Add the LinearLayout to the ScrollView
-		box.addView(boxTables);
-		
-		
-		// Call the listener to load the images
-		BoxListener listener = listenerReference.get();
-		if(adv) {
-			listener.createAdvBoxScoreFrag(box, home);
-		} else {
-			listener.createBoxScoreFrag(box, home);
+
+			// Create the LinearLayout that holds the 2 Tables
+			LinearLayout boxTables = new LinearLayout(activityReference.get());
+			ScrollView.LayoutParams tablesLayout = new ScrollView.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+			boxTables.setLayoutParams(tablesLayout);
+			boxTables.setOrientation(LinearLayout.HORIZONTAL);
+			boxTables.setId(adv ? R.id.adv_box_tables : R.id.box_tables);
+
+			//
+			// Create the Table for the Player Names
+			//
+			TableLayout playerTable = new TableLayout(activityReference.get());
+			LinearLayout.LayoutParams namesParams = new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f);
+			playerTable.setLayoutParams(namesParams);
+			playerTable.setBackgroundColor(activityReference.get().getResources().getColor(R.color.WHITE));
+			playerTable.setId(adv ? R.id.adv_box_table_players : R.id.box_table_players);
+			// Create a Table Row for the Title
+			TableRow playerTitle = createPlayerRow(TITLE_ROW, null, 0, home, adv);
+			playerTable.addView(playerTitle);
+
+			//
+			// Create the Horizontal ScrollView that holds the Table for Stats
+			//
+			HorizontalScrollView statsScroll = new HorizontalScrollView(activityReference.get());
+			//LinearLayout.LayoutParams statsScrollParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT, 1.0f);
+			LinearLayout.LayoutParams statsScrollParams = new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1.0f);
+			statsScroll.setLayoutParams(statsScrollParams);
+			statsScroll.setHorizontalScrollBarEnabled(true);
+			// TODO: Stretch
+			statsScroll.setFillViewport(true);
+			statsScroll.setId(adv ? R.id.adv_box_table_stats_scroll : R.id.box_table_stats_scroll);
+
+			// LinearLayout for the HorizontalScrollView
+			LinearLayout statsLayout = new LinearLayout(activityReference.get());
+			HorizontalScrollView.LayoutParams horiParams = new HorizontalScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+			statsLayout.setLayoutParams(horiParams);
+			statsLayout.setOrientation(LinearLayout.VERTICAL);
+
+			// Create the Stats Table (it scrolls horizontal)
+			TableLayout statsTable = new TableLayout(activityReference.get());
+			//HorizontalScrollView.LayoutParams statsTableParams = new HorizontalScrollView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+			//TableLayout.LayoutParams statsTableParams = new TableLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+			LinearLayout.LayoutParams statsTableParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+			statsTable.setLayoutParams(statsTableParams);
+			//statsTable.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
+			statsTable.setBackgroundColor(activityReference.get().getResources().getColor(R.color.WHITE));
+			statsTable.setId(adv ? R.id.adv_box_table_stats : R.id.box_table_stats);
+			// Create a Table Row for the Stats Title
+			TableRow statsTitle = createStatsRow(TITLE_ROW, null, 0, home, adv);
+			statsTable.addView(statsTitle);
+			// Create Table Rows for all the Player Stats
+			Iterator<Map.Entry<String, BoxScoreLine>> it;
+			if(home == true) {
+				it = myGame.HomeTeamBox.entrySet().iterator();
+			} else {
+				it = myGame.AwayTeamBox.entrySet().iterator();
+			}
+			int index = 0;
+			while(it.hasNext()) {
+
+				Entry<String, BoxScoreLine> pair = it.next();
+				String name = pair.getKey();
+				BoxScoreLine boxScoreLine = pair.getValue();
+
+				if(boxScoreLine.Minutes != 0) {
+					// Stats row
+					TableRow statsRow = createStatsRow(STATS_ROW, name, index, home, adv);
+					statsTable.addView(statsRow);
+					// Player name row
+					TableRow playerRow = createPlayerRow(STATS_ROW, name, index, home, adv);
+					playerTable.addView(playerRow);
+					index++;
+				}
+			}
+
+			// Add the Tables to the Layout
+			//statsScroll.addView(statsTable);
+			statsLayout.addView(statsTable);
+			statsScroll.addView(statsLayout);
+			boxTables.addView(playerTable);
+			//advBoxTables.addView(statsTable);
+			boxTables.addView(statsScroll);
+			// Add the LinearLayout to the ScrollView
+			box.addView(boxTables);
+
+
+			// Call the listener to load the images
+			BoxListener listener = listenerReference.get();
+			if(adv) {
+				listener.createAdvBoxScoreFrag(box, home);
+			} else {
+				listener.createBoxScoreFrag(box, home);
+			}
+		} catch(Exception e) {
+			Log.d(TAG, "GameFragmentUpdateTask : caught exception e = " + e);
+			e.printStackTrace();
 		}
 	}
 
@@ -738,7 +747,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 	private TableRow createPlayerRow(int type, String name, int row, boolean home, boolean adv) {
 
 		//Log.d(TAG, "createPlayerRow: type = " + type + ", name = " + name + ", row = " + row + ", home = " + home);
-		
+
 		int marginSmall = NBAStatStream.dpToPx(0.5f);
 
 		TableRow playerRow = new TableRow(activityReference.get());
@@ -761,7 +770,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 	private TableRow createStatsText(TableRow myRow, int type, int rowNum, int colNum, String name, boolean home, boolean adv) {
 
 		//Log.d(TAG, "createStatsText: row = " + rowNum + ", col = " + colNum);
-		
+
 		// Pixels for margin and padding
 		int marginSmall = NBAStatStream.dpToPx(0.5f);
 		int padSmall = NBAStatStream.dpToPx(2.0f);
@@ -776,16 +785,16 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		myText.setPadding(padSmall, padSmall, padSmall, padSmall);
 		//myText.setLines(1);
 
-		// Get the Team Colors to use
-		TeamInfo teamInfo;
-		if(home == true) {
-			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam.getFullName());
-		} else {
-			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam.getFullName());
-		}
-
+		NBATeamInfo myTeamInfo = ((NBATeamInfo) activityReference.get().getApplicationContext());
 		if(type == TITLE_ROW) {
-			myText.setBackgroundColor(activityReference.get().getResources().getColor(teamInfo.color_main));
+			// Get the Team Colors to use
+			int teamColor;
+			if(home == true) {
+				teamColor = myTeamInfo.getTeamColor(myGame.HomeTeam.getFullName(), true);
+			} else {
+				teamColor = myTeamInfo.getTeamColor(myGame.AwayTeam.getFullName(), true);
+			}
+			myText.setBackgroundColor(activityReference.get().getResources().getColor(teamColor));
 			myText.setTextColor(activityReference.get().getResources().getColor(R.color.WHITE));
 			myText.setGravity(Gravity.CENTER);
 			myText.setText(getStatsText(true, home, adv, colNum, null));
@@ -831,16 +840,16 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		//myText.setFocusable(true);
 		//myText.setFocusableInTouchMode(true);
 
-		// Get the Team Colors to use
-		TeamInfo teamInfo;
-		if(home == true) {
-			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.HomeTeam.getFullName());
-		} else {
-			teamInfo = NBAStatStream.NBATeamInfo.get(myGame.AwayTeam.getFullName());
-		}
-
+		NBATeamInfo myTeamInfo = ((NBATeamInfo) activityReference.get().getApplicationContext());
 		if(type == TITLE_ROW) {
-			myText.setBackgroundColor(activityReference.get().getResources().getColor(teamInfo.color_main));
+			// Get the Team Colors to use
+			int teamColor;
+			if(home == true) {
+				teamColor = myTeamInfo.getTeamColor(myGame.HomeTeam.getFullName(), true);
+			} else {
+				teamColor = myTeamInfo.getTeamColor(myGame.AwayTeam.getFullName(), true);
+			}
+			myText.setBackgroundColor(activityReference.get().getResources().getColor(teamColor));
 			myText.setTextColor(activityReference.get().getResources().getColor(R.color.WHITE));
 		} else {
 			// Set the Background color
@@ -861,12 +870,12 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 			default: break;
 			}
 		}
-		
+
 		// Add the TextView to the row
 		myRow.addView(myText);
 		return myRow;
 	}
-	
+
 	private String getStatsText(boolean title, boolean home, boolean adv, int col, String name) {
 		String text;
 		if(title) {
@@ -895,10 +904,10 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		}
 		return text;
 	}
-	
+
 	private String getBoxStatsText(boolean home, int col, String name) {
 		String text;
-		
+
 		// Get the BoxScoreLine and AdvancedBoxScoreLine for the player
 		AdvancedBoxScoreLine advbox;
 		BoxScoreLine box;
@@ -927,10 +936,10 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		}
 		return text;
 	}
-	
+
 	private String getAdvStatsText(boolean home, int col, String name) {
 		String text;
-		
+
 		// Get the BoxScoreLine and AdvancedBoxScoreLine for the player
 		AdvancedBoxScoreLine advbox;
 		BoxScoreLine box;
@@ -959,13 +968,13 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		}
 		return text;
 	}
-	
+
 	private String formatString(float num) {
 		DecimalFormat threeZeroes = new DecimalFormat("#0.000");
 		String result = threeZeroes.format(num);
 		return result;
 	}
-	
+
 	// Returns true if the home team was the better stat
 	// Requires the arguments passed in order: (away, home)
 	//  - Except for TOV% because lower is better so pass as (home, away)
