@@ -44,6 +44,16 @@ public class Team {
 	@JsonProperty("full_name")
 	private String fullName;
 	
+	private Integer imageResource;
+	
+	private Integer colorMain;
+	
+	private Integer colorSecond;
+	
+	private Integer colorThird;
+	
+	private Integer colorFourth;
+	
 	public String getTeamId() {
 		return teamId;
 	}
@@ -122,5 +132,45 @@ public class Team {
 	
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
+	}
+
+	public Integer getImageResource() {
+		return imageResource;
+	}
+
+	public void setImageResource(Integer imageResource) {
+		this.imageResource = imageResource;
+	}
+
+	public Integer getColorMain() {
+		return colorMain;
+	}
+
+	public void setColorMain(Integer colorMain) {
+		this.colorMain = colorMain;
+	}
+
+	public Integer getColorSecond() {
+		return colorSecond;
+	}
+
+	public void setColorSecond(Integer colorSecond) {
+		this.colorSecond = colorSecond;
+	}
+
+	public Integer getColorThird() {
+		return colorThird;
+	}
+
+	public void setColorThird(Integer colorThird) {
+		this.colorThird = colorThird;
+	}
+
+	public Integer getColorFourth() {
+		return colorFourth;
+	}
+
+	public void setColorFourth(Integer colorFourth) {
+		this.colorFourth = colorFourth;
 	}
 }
