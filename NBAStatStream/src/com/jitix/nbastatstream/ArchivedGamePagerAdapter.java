@@ -1,17 +1,17 @@
 package com.jitix.nbastatstream;
 
-import java.util.Vector;
-import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.util.Log;
+import android.util.SparseArray;
+import android.view.ViewGroup;
 
 public class ArchivedGamePagerAdapter extends FragmentPagerAdapter {
 
 	private static final String TAG = "NBAStatStream";
 	
-	Vector<Fragment> myFragments = new Vector<Fragment>(); 
+	SparseArray<Fragment> myFragments = new SparseArray<Fragment>(); 
 	
 	public ArchivedGamePagerAdapter(FragmentManager fm) {
 		super(fm);
@@ -21,10 +21,7 @@ public class ArchivedGamePagerAdapter extends FragmentPagerAdapter {
 	public Fragment getItem(int i) {
 		
 		Fragment fragment = ArchivedGameFragment.newInstance(i);
-		Log.d(TAG, "Fragment getItem i = " + i);
-		
-		myFragments.add(fragment);
-		Log.d(TAG, "Placing the Fragment in the Vector at index = " + i + ", vector.size() = " + myFragments.size());
+		Log.d(TAG, "ArchivedGamePagerAdapter : getItem : i = " + i);
 		
 		return fragment;
 	}
@@ -34,6 +31,22 @@ public class ArchivedGamePagerAdapter extends FragmentPagerAdapter {
 		return 3;
 	}
 	
+	@Override
+	public void destroyItem(ViewGroup container, int position, Object object) {
+		Log.d(TAG, "ArchivedGamePagerAdapter : destroyItem called for position " + position);
+		myFragments.remove(position);
+		super.destroyItem(container, position, object);
+	}
+
+	@Override
+	public Object instantiateItem(ViewGroup container, int position) {
+		Log.d(TAG, "ArchivedGamePagerAdapter : instantiateItem called for position " + position);
+		Fragment frag = (Fragment) super.instantiateItem(container, position);
+		myFragments.put(position, frag);
+		Log.d(TAG, "ArchivedGamePagerAdapter : Placing the Fragment in Array index = " + position + ", vector.size() = " + myFragments.size());
+		return frag;
+	}
+
 	public Fragment getFrag(int index) {
 		try {
 			return myFragments.get(index);
