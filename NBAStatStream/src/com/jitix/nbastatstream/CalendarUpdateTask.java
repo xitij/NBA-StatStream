@@ -48,7 +48,7 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 	@Override
 	protected RelativeLayout doInBackground(Event... params) {
 		myEvent = params[0];
-		Log.d(TAG, "CalendarUpdateTask running doInBackground for eventID = " + myEvent.getEventId());
+		//Log.d(TAG, "CalendarUpdateTask running doInBackground for eventID = " + myEvent.getEventId());
 		if(activityReference != null) {
 			return updateGameView(myEvent);
 		} else {
@@ -65,7 +65,7 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 				final ViewGroup parentView = parentViewReference.get();
 				if(parentView != null) {
 					parentView.addView(result);
-					Log.d(TAG, "Added View with ID = " + eventId);
+					//Log.d(TAG, "Added View with ID = " + eventId);
 					//Log.d(TAG, "Calling loadImages from AsyncTask");
 					TaskListener listener = (TaskListener) activityReference.get();
 					listener.loadImages(myEvent, eventId);
