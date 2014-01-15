@@ -431,28 +431,37 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 	public void update4Factors(BasketballGame myGame) {
 		
 		// Update the view with the data in the BasketballGame object
-		GameFragmentUpdateTask updateTask = new GameFragmentUpdateTask(this.getActivity(), this, myGame, (ViewGroup) getView().findViewById(R.id.pager_4factors_layout));
-		Bundle args = getArguments();
-		//updateTask.execute(args.getInt(PAGE_NUM));
-		updateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args.getInt(PAGE_NUM));
+		ViewGroup myView = (ViewGroup) getView();
+		if(myView != null) {
+			GameFragmentUpdateTask updateTask = new GameFragmentUpdateTask(this.getActivity(), this, myGame, (ViewGroup) myView.findViewById(R.id.pager_4factors_layout));
+			Bundle args = getArguments();
+			//updateTask.execute(args.getInt(PAGE_NUM));
+			updateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args.getInt(PAGE_NUM));
+		}
 	}
 	
 	public void updateBox(BasketballGame myGame) {
 		
-		// Update the view with the data in the BasketballGame object
-		GameFragmentUpdateTask updateTask = new GameFragmentUpdateTask(this.getActivity(), this, myGame, (ViewGroup) getView().findViewById(R.id.pager_box_layout));
-		Bundle args = getArguments();
-		//updateTask.execute(args.getInt(PAGE_NUM));
-		updateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args.getInt(PAGE_NUM));
+		ViewGroup myView = (ViewGroup) getView();
+		if(myView != null) {
+			// Update the view with the data in the BasketballGame object
+			GameFragmentUpdateTask updateTask = new GameFragmentUpdateTask(this.getActivity(), this, myGame, (ViewGroup) myView.findViewById(R.id.pager_box_layout));
+			Bundle args = getArguments();
+			//updateTask.execute(args.getInt(PAGE_NUM));
+			updateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args.getInt(PAGE_NUM));
+		}
 	}
 
 	public void updateAdvBox(BasketballGame myGame) {
 
-		// Update the view with the data in the BasketballGame object
-		GameFragmentUpdateTask updateTask = new GameFragmentUpdateTask(this.getActivity(), this, myGame, (ViewGroup) getView().findViewById(R.id.pager_advbox_layout));
-		Bundle args = getArguments();
-		//updateTask.execute(args.getInt(PAGE_NUM));
-		updateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args.getInt(PAGE_NUM));
+		ViewGroup myView = (ViewGroup) getView();
+		if(myView != null) {
+			// Update the view with the data in the BasketballGame object
+			GameFragmentUpdateTask updateTask = new GameFragmentUpdateTask(this.getActivity(), this, myGame, (ViewGroup) myView.findViewById(R.id.pager_advbox_layout));
+			Bundle args = getArguments();
+			//updateTask.execute(args.getInt(PAGE_NUM));
+			updateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args.getInt(PAGE_NUM));
+		}
 	}
 	
 	public void updateShotChart(BasketballGame myGame) {
@@ -540,6 +549,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 	
 	private void loadBitmap(int resId, ImageView imageView, int width, int height, boolean last) {
 		BitmapWorkerTask task = new BitmapWorkerTask(getActivity(), imageView, last);
-		task.execute(resId, width, height);
+		//task.execute(resId, width, height);
+		task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resId, width, height);
 	}
 }
