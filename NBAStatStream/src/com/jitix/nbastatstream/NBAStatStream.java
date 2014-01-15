@@ -58,12 +58,24 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		// Get the Progress Bar
 		progress = (ProgressBar) findViewById(R.id.calendar_progress_bar);
 		
-		// Get the current date
-		final Calendar cal = Calendar.getInstance();
-		Integer year = cal.get(Calendar.YEAR);
-		Integer month = cal.get(Calendar.MONTH) + 1;
-		Integer day = cal.get(Calendar.DAY_OF_MONTH);
-		String dateString = month + "/" + day.toString() + "/" + year.toString();
+		// Get the current date or the saved date
+		Integer year;
+		Integer month;
+		Integer day;
+		String dateString;
+		if(savedInstanceState == null) {
+			final Calendar cal = Calendar.getInstance();
+			year = cal.get(Calendar.YEAR);
+			month = cal.get(Calendar.MONTH) + 1;
+			day = cal.get(Calendar.DAY_OF_MONTH);
+			dateString = month + "/" + day.toString() + "/" + year.toString();
+		} else {
+			year = savedInstanceState.getInt("DateYear", -1);
+			month = savedInstanceState.getInt("DateMonth", -1);
+			day = savedInstanceState.getInt("DateDay", -1);
+			dateString = month + "/" + day + "/" + year;
+			Log.d(TAG, "NBAStatStream : onCreate : savedDate = " + dateString);
+		}
 		
 		// Set up the date button
 		Button dateButton = (Button) findViewById(R.id.calendar_date_picker);
@@ -83,6 +95,25 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		progress.setVisibility(View.VISIBLE);
 		new GameDownloader(this, this).execute(year.toString(), monthString, day.toString());
 	}
+
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		// Store the date from the Button
+		Button dateButton = (Button) findViewById(R.id.calendar_date_picker);
+		String[] dateString = ((String) dateButton.getText()).split("/");
+		String month = dateString[0];
+		String day = dateString[1];
+		String year = dateString[2];
+		Log.d(TAG, "NBAStatStream : onSaveInstanceState : saving date = " + month + "/" + day + "/" + year);
+		
+		outState.putInt("DateYear", Integer.parseInt(year));
+		outState.putInt("DateMonth", Integer.parseInt(month));
+		outState.putInt("DateDay", Integer.parseInt(day));
+		//String dateString = Integer.toString(month + 1) + "/" + Integer.toString(day) + "/" + Integer.toString(year);
+	}
+
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
