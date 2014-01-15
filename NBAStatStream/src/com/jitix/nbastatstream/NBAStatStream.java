@@ -1,6 +1,8 @@
 package com.jitix.nbastatstream;
 
 import java.util.Calendar;
+
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -488,8 +490,8 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 	
 	private void loadBitmap(int resId, ImageView imageView, int width, int height, boolean last) {
 		BitmapWorkerTask task = new BitmapWorkerTask(this, imageView, last);
-		task.execute(resId, width, height);
-		//task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resId, width, height);
+		//task.execute(resId, width, height);
+		task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resId, width, height);
 	}
 	
 	private String getMonthString(int month) {
