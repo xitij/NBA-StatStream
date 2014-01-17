@@ -12,6 +12,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,6 +39,12 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 	private static ProgressBar progress;
 	// Events downloaded
 	private static Events myEvents;
+	// Object to hold our GameDownloader
+	private GameDownloader myDownloader = null;
+	// Array to hold our CalendarUpdateTasks
+	SparseArray<CalendarUpdateTask> calendarTasks = new SparseArray<CalendarUpdateTask>(15);
+	// Array to hold our BitmapWorkerTasks
+	SparseArray<BitmapWorkerTask> bitmapTasks = new SparseArray<BitmapWorkerTask>(30);
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +102,8 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		// Download the games for the start date
 		String monthString = getMonthString(month);
 		progress.setVisibility(View.VISIBLE);
-		new GameDownloader(this, this).execute(year.toString(), monthString, day.toString());
+		myDownloader = new GameDownloader(this, this);
+		myDownloader.execute(year.toString(), monthString, day.toString());
 	}
 
 
@@ -210,7 +218,18 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 			// Call the downloader
 			String monthString = getMonthString(month+1);
 			progress.setVisibility(View.VISIBLE);
-			new GameDownloader(this, this).execute(year.toString(), monthString, day.toString());
+			if(myDownloader != null) {
+				Log.d(TAG, "NBAStatStream : downloadPreviousEvents : myDownloader != null, cancelling it..");
+				if(!myDownloader.cancel(true)) {
+					Log.d(TAG, "NBAStatStream : downloadPreviousEvents : myDownloader failed to cancel.");
+				}
+			}
+			removeGameView();
+			myDownloader = new GameDownloader(this, this);
+			myDownloader.execute(year.toString(), monthString, day.toString());
+			// Cancel all the previous calendar update and bitmap worker tasks because we have no games
+			cancelBitmapTasks();
+			cancelCalendarTasks();
 		}
 	}
 	
@@ -248,7 +267,18 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 			// Call the downloader
 			String monthString = getMonthString(month+1);
 			progress.setVisibility(View.VISIBLE);
-			new GameDownloader(this, this).execute(year.toString(), monthString, day.toString());
+			if(myDownloader != null) {
+				Log.d(TAG, "NBAStatStream : downloadNextEvents : myDownloader != null, cancelling it..");
+				if(!myDownloader.cancel(true)) {
+					Log.d(TAG, "NBAStatStream : downloadNextEvents : myDownloader failed to cancel.");
+				}
+			}
+			removeGameView();
+			myDownloader = new GameDownloader(this, this);
+			myDownloader.execute(year.toString(), monthString, day.toString());
+			// Cancel all the previous calendar update and bitmap worker tasks because we have no games
+			cancelBitmapTasks();
+			cancelCalendarTasks();
 		}
 	}
 	
@@ -315,6 +345,10 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 	public void downloadedGames(String result) {
 		Log.d(TAG, "NBAStatSteam : downloadedGames called!");
 
+		myDownloader = null;
+		// Cancel all registered CalnedarUpdateTasks and BitmapWorkerTasks so they populate old views
+		cancelCalendarTasks();
+		cancelBitmapTasks();
 		LinearLayout eventsView = (LinearLayout) findViewById(R.id.calendar_events_layout);
 		removeGameView();
 		
@@ -342,6 +376,8 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 					CalendarUpdateTask calendarTask = new CalendarUpdateTask(this, eventsView, i);
 					calendarTask.execute(event);
 					//calendarTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, event);
+					// Register all the CalendarUpdateTasks
+					registerCalendarTask(calendarTask, i);
 					i++;
 				}
 			} catch(IOException e) {
@@ -364,12 +400,12 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		int eventViewId = Integer.parseInt(event.getEventId().split("-")[0]) + id;
 		ImageView awayImageView = (ImageView) findViewById(eventViewId + 1000);
 		int awayLogo = ((NBATeamInfo) getApplicationContext()).getTeamLogo(event.getAwayTeam().getFullName());
-		loadBitmap(awayLogo, awayImageView, pixels, pixels, false);
+		loadBitmap(awayLogo, awayImageView, pixels, pixels, id, false);
 		
 		// Get the Home ImageView and resource ID
 		ImageView homeImageView = (ImageView) findViewById(eventViewId + 3000);
 		int homeLogo = ((NBATeamInfo) getApplicationContext()).getTeamLogo(event.getHomeTeam().getFullName());
-		loadBitmap(homeLogo, homeImageView, pixels, pixels, lastEvent);
+		loadBitmap(homeLogo, homeImageView, pixels, pixels, id+1, lastEvent);
 	}
 
 	@Override
@@ -438,7 +474,17 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 			// Get the games for the selected date
 			String monthString = getMonthString(month+1);
 			progress.setVisibility(View.VISIBLE);
-			new GameDownloader(this, this).execute(Integer.toString(year), monthString, Integer.toString(day));
+			if(myDownloader != null) {
+				Log.d(TAG, "NBAStatStream : onDateSet : myDownloader != null, cancelling it..");
+				if(!myDownloader.cancel(true)) {
+					Log.d(TAG, "NBAStatStream : onDateSet : myDownloader failed to cancel.");
+				}
+			}
+			myDownloader = new GameDownloader(this, this);
+			myDownloader.execute(Integer.toString(year), monthString, Integer.toString(day));
+			// Cancel all the previous calendar update and bitmap worker tasks because we have no games
+			cancelBitmapTasks();
+			cancelCalendarTasks();
 		}
 	}
 	
@@ -488,10 +534,11 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 		dateButton.setText(dateString);
 	}
 	
-	private void loadBitmap(int resId, ImageView imageView, int width, int height, boolean last) {
+	private void loadBitmap(int resId, ImageView imageView, int width, int height, int id, boolean last) {
 		BitmapWorkerTask task = new BitmapWorkerTask(this, imageView, last);
 		//task.execute(resId, width, height);
 		task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resId, width, height);
+		registerBitmapTask(task, id);
 	}
 	
 	private String getMonthString(int month) {
@@ -512,5 +559,31 @@ public class NBAStatStream extends FragmentActivity implements TaskListener, OnC
 	@Override
 	public void hideProgress() {
 		progress.setVisibility(View.GONE);
+	}
+	
+	private void registerCalendarTask(CalendarUpdateTask task, int idx) {
+		calendarTasks.put(idx, task);
+	}
+	
+	private void registerBitmapTask(BitmapWorkerTask task, int idx) {
+		bitmapTasks.put(idx, task);
+	}
+	
+	private void cancelCalendarTasks() {
+		for(int i=0; i < calendarTasks.size(); i++) {
+			if(calendarTasks.valueAt(i) != null) {
+				calendarTasks.get(i).cancel(true);
+			}
+		}
+		calendarTasks.clear();
+	}
+	
+	private void cancelBitmapTasks() {
+		for(int i=0; i < bitmapTasks.size(); i++) {
+			if(bitmapTasks.valueAt(i) != null) {
+				bitmapTasks.get(i).cancel(true);
+			}
+		}
+		bitmapTasks.clear();
 	}
 }
