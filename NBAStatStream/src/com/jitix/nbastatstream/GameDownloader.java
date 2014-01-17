@@ -30,7 +30,7 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 	//
 	// Strings needed to make an API request
 	//
-	private static final String ACCESS_TOKEN 	= "9d607c10-a6ae-4712-b46b-56cd28181d1a";
+	private static final String ACCESS_TOKEN 	= "b5eff297-def7-4c91-b940-05e13f2f8f30";
 	private static final String USER_AGENT_NAME = "NBAStatStream/1.0 (tlourchane@gmail.com)";
 	private static final String AUTHORIZATION 	= "Authorization";
 	private static final String BEARER 			= "Bearer " + ACCESS_TOKEN;
@@ -44,7 +44,7 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 	private boolean boxScore;
 
 	public GameDownloader(Context context, TaskListener listener) {
-		
+
 		activityReference = new WeakReference<Activity>((Activity) context);
 		listenerReference = new WeakReference<TaskListener>(listener);
 	}
@@ -73,20 +73,24 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 
 		Log.d(TAG, "GameDownloader: Request for boxscore = " + boxScore + ", requestURL = " + requestURL);
 
-		StringBuilder sb = null;
-		try {
-			sb = requestAPIData(requestURL);
-		} catch (IOException e) {
-			Log.d(TAG, "GameDownloader: requestGameEvents : Exception thrown e = " + e);
-			e.printStackTrace();
-		}
+		if(!isCancelled()) {
+			StringBuilder sb = null;
+			try {
+				sb = requestAPIData(requestURL);
+			} catch (IOException e) {
+				Log.d(TAG, "GameDownloader: requestGameEvents : Exception thrown e = " + e);
+				e.printStackTrace();
+			}
 
-		if(sb != null) {
-			// Convert to a string and return it
-			return sb.toString();
+			if(sb != null) {
+				// Convert to a string and return it
+				return sb.toString();
+			} else {
+				String error = "Error String";
+				return error;
+			}
 		} else {
-			String error = "Error String";
-			return error;
+			return null;
 		}
 	}
 
@@ -109,6 +113,11 @@ public class GameDownloader extends AsyncTask<String, Void, String> {
 		} else {
 			Log.d(TAG, "GameDownloader : onPostExecute : activityReference or activtyReference.get() == null, Not calling Listener");
 		}
+	}
+
+	@Override
+	protected void onCancelled(String result) {
+		Log.d(TAG, "GameDownloader : onCancelled : cancelling for result");
 	}
 
 	private StringBuilder requestAPIData(String requestURL) throws IOException {

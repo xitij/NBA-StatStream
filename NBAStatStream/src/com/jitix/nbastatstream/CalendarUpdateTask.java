@@ -48,8 +48,8 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 	@Override
 	protected RelativeLayout doInBackground(Event... params) {
 		myEvent = params[0];
-		//Log.d(TAG, "CalendarUpdateTask running doInBackground for eventID = " + myEvent.getEventId());
-		if(activityReference != null) {
+		Log.d(TAG, "CalendarUpdateTask running doInBackground for eventID = " + myEvent.getEventId());
+		if(activityReference != null && !isCancelled()) {
 			return updateGameView(myEvent);
 		} else {
 			return null;
@@ -74,6 +74,13 @@ public class CalendarUpdateTask extends AsyncTask<Event, Void, RelativeLayout> {
 		}
 	}
 	
+	@Override
+	protected void onCancelled(RelativeLayout result) {
+		if(result != null) {
+			Log.d(TAG, "CalendarUpdateTask : onCancelled : calling for resultID = " + result.getId());
+		}
+	}
+
 	private RelativeLayout updateGameView(Event event) {
 		
 		int gameSize = NBAStatStream.dpToPx(120.0f);

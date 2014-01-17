@@ -55,15 +55,17 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 
 	@Override
 	protected ViewGroup doInBackground(Integer... params) {
-		if(params[0] == ArchivedGameFragment.FOUR_FACTORS) {
-			PAGE_NUM = params[0];
-			return update4Factors();
-		} else if(params[0] == ArchivedGameFragment.ADV_BOX_SCORE) {
-			PAGE_NUM = params[0];
-			return updateAdvBox();
-		} else if(params[0] == ArchivedGameFragment.BOX_SCORE){
-			PAGE_NUM = params[0];
-			return updateBox();
+		if(!isCancelled()) {
+			if(params[0] == ArchivedGameFragment.FOUR_FACTORS) {
+				PAGE_NUM = params[0];
+				return update4Factors();
+			} else if(params[0] == ArchivedGameFragment.ADV_BOX_SCORE) {
+				PAGE_NUM = params[0];
+				return updateAdvBox();
+			} else if(params[0] == ArchivedGameFragment.BOX_SCORE){
+				PAGE_NUM = params[0];
+				return updateBox();
+			}
 		}
 
 		return null;
@@ -74,28 +76,33 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		super.onPostExecute(result);
 		// Add the Game/Event view to the Events View
 		if(activityReference != null && activityReference.get() != null) {
-			if(activityReference.get().isDestroyed() == false) {
-				if(parentViewReference != null && result != null) {
-					final ViewGroup parentView = parentViewReference.get();
-					if(parentView != null) {
-						if((PAGE_NUM == ArchivedGameFragment.ADV_BOX_SCORE || PAGE_NUM == ArchivedGameFragment.BOX_SCORE) && parentView.getChildCount() != 0) {
-							//Log.d(TAG, "BOX_SCORE! Removing old view before adding result");
-							parentView.removeViewAt(0);
-							parentView.addView(result, 0);
-						} else {
-							//Log.d(TAG, "4Factors! Adding result");
-							parentView.addView(result);
-						}
-						//Log.d(TAG, "Calling loadImages from AsyncTask");
-						BoxListener listener = listenerReference.get();
-						listener.loadImages(myGame);
+			if(parentViewReference != null && result != null) {
+				final ViewGroup parentView = parentViewReference.get();
+				if(parentView != null) {
+					if((PAGE_NUM == ArchivedGameFragment.ADV_BOX_SCORE || PAGE_NUM == ArchivedGameFragment.BOX_SCORE) && parentView.getChildCount() != 0) {
+						//Log.d(TAG, "BOX_SCORE! Removing old view before adding result");
+						parentView.removeViewAt(0);
+						parentView.addView(result, 0);
 					} else {
-						Log.d(TAG, "GameFragmentUpdateTask : parentView == null for PAGE_NUM = " + PAGE_NUM);
+						//Log.d(TAG, "4Factors! Adding result");
+						parentView.addView(result);
 					}
+					//Log.d(TAG, "Calling loadImages from AsyncTask");
+					BoxListener listener = listenerReference.get();
+					listener.loadImages(myGame);
+				} else {
+					Log.d(TAG, "GameFragmentUpdateTask : parentView == null for PAGE_NUM = " + PAGE_NUM);
 				}
 			}
 		} else {
 			Log.d(TAG, "GameFragmentUpdateTask : activityReference == null for PAGE_NUM = " + PAGE_NUM);
+		}
+	}
+
+	@Override
+	protected void onCancelled(ViewGroup result) {
+		if(result != null) {
+			Log.d(TAG, "GameFrgmentUpdateTask : onCancelled : cancelling for resultID = " + result.getId());
 		}
 	}
 
@@ -448,7 +455,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 
 		// Create the Advanced Box Score TableLayout for the Home and Away Fragments
 		if(activityReference != null && activityReference.get() != null) {
-			if(activityReference.get().isDestroyed() == false) {
+			if(!isCancelled()) {
 				//Log.d(TAG, "creating Advanced Box Score Tables.....");
 				createBoxTable(false, true);
 				createBoxTable(true, true);
@@ -456,7 +463,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 		} else {
 			Log.d(TAG, "activityReference == null");
 		}
-		
+
 
 		return buttonLayout;
 	}
@@ -478,7 +485,7 @@ public class GameFragmentUpdateTask extends AsyncTask<Integer, Void, ViewGroup> 
 
 		// Create the Advanced Box Score TableLayout for the Home and Away Fragments
 		if(activityReference != null && activityReference.get() != null) {
-			if(activityReference.get().isDestroyed() == false) {
+			if(!isCancelled()) {
 				//Log.d(TAG, "creating Box Score Tables.....");
 				createBoxTable(false, false);
 				createBoxTable(true, false);
