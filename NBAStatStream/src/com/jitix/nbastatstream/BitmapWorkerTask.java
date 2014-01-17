@@ -32,7 +32,7 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
 		data = params[0];
 		int width = params[1];
 		int height = params[2];
-		if(contextReference != null) {
+		if(contextReference != null && !isCancelled()) {
 			return decodeSampledBitmap(contextReference.get().getResources(), data, width, height);
 		} else {
 			return null;
@@ -58,6 +58,14 @@ public class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
 			}
 		} else {
 			Log.d(TAG, "ImageViewReference or bitmap == null");
+		}
+	}
+
+	@Override
+	protected void onCancelled(Bitmap result) {
+		if(result != null) {
+			Log.d(TAG, "BitmapWorkerTask : onCancelled : cancelling for result = " + result);
+			result.recycle();
 		}
 	}
 
