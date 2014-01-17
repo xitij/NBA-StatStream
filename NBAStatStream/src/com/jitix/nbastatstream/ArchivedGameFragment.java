@@ -26,12 +26,17 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 	static final int SHOT_CHART = 3;
 	private boolean destroyed = false;
 	private int activeBox = 0;
-	
+
 	Vector<Fragment> myAdvBoxFragments = new Vector<Fragment>();
 	Vector<ViewGroup> myAdvBoxViews = new Vector<ViewGroup>();
 	Vector<Fragment> myBoxFragments = new Vector<Fragment>();
 	Vector<ViewGroup> myBoxViews = new Vector<ViewGroup>();
-	
+
+	private GameFragmentUpdateTask factorsUpdateTask = null;
+	private GameFragmentUpdateTask advBoxUpdateTask = null;
+	private GameFragmentUpdateTask boxUpdateTask = null;
+	Vector<BitmapWorkerTask> bitmapTasks = new Vector<BitmapWorkerTask>(6);
+
 	//
 	// newInstance: Returns an instance of the ArchivedGameFragment. Takes i (page_num)
 	// 	as argument. It creates a new instance if it doesn't exist otherwise returns
@@ -39,17 +44,17 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 	//
 	public static ArchivedGameFragment newInstance(int i) {
 		ArchivedGameFragment fragment = new ArchivedGameFragment();
-		
+
 		Log.d(TAG, "newInstance called for ArchivedGameFragment with i = " + i);
-		
+
 		// Put i in the arguments
 		Bundle args = new Bundle();
 		args.putInt(PAGE_NUM, i);
 		fragment.setArguments(args);
-		
+
 		return fragment;
 	}
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -59,16 +64,16 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		
+
 		if(savedInstanceState != null) {
 			Log.d(TAG, "ArchivedGameFragment : onCreateView : savedInstanceState != null : trying to getFrags");
-			
+
 			activeBox = savedInstanceState.getInt("boxNum");
 			AdvancedBoxScoreFragment awayBox;
 			AdvancedBoxScoreFragment homeBox;
 			AdvancedBoxScoreFragment awayAdvBox;
 			AdvancedBoxScoreFragment homeAdvBox;
-			
+
 			Bundle args = getArguments();
 			if(args.getInt(PAGE_NUM) == BOX_SCORE) {
 				awayBox = (AdvancedBoxScoreFragment) getChildFragmentManager().getFragment(savedInstanceState, "BoxFragAway");
@@ -90,7 +95,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 				}
 			}
 		}
-		
+
 		Bundle args = getArguments();
 		View myView;
 		Log.d(TAG, "ArchivedGameFragment : onCreateView : page_num = " + args.getInt(PAGE_NUM));
@@ -114,7 +119,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 
 		return myView;
 	}
-	
+
 	@Override
 	public void onPause() {
 		super.onPause();
@@ -131,20 +136,59 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 	public void onDestroy() {
 		super.onDestroy();
 		Log.d(TAG, "ArchivedGameFragment onDestroy() called!");
+		if(factorsUpdateTask != null) {
+			Log.d(TAG, "ArchivedGameFragment : onDestroy : cancelling the 4Factors Task");
+			factorsUpdateTask.cancel(true);
+		}
+		if(advBoxUpdateTask != null) {
+			Log.d(TAG, "ArchivedGameFragment : onDestroy : cancelling the AdvancedBox Task");
+			advBoxUpdateTask.cancel(true);
+		}
+		if(boxUpdateTask != null) {
+			Log.d(TAG, "ArchivedGameFragment : onDestroy : cancelling the Box Task");
+			boxUpdateTask.cancel(true);
+		}
+		cancelBitmapTasks();
 		destroyed = true;
+		Bundle args = getArguments();
+		if(args.getInt(PAGE_NUM) == FOUR_FACTORS) {
+			if(getView() != null) {
+				unbindBitmap(getView().findViewById(R.id.four_factors_away_logo));
+				unbindBitmap(getView().findViewById(R.id.four_factors_home_logo));
+			}
+		}
+		else if(args.getInt(PAGE_NUM) == BOX_SCORE) {
+			if(getBoxView(0) != null) {
+				unbindBitmap(getBoxView(0).findViewById(R.id.box_away_team_logo));
+			}
+			if(getBoxView(1) != null) {
+				unbindBitmap(getBoxView(1).findViewById(R.id.box_home_team_logo));
+			}
+		} else if(args.getInt(PAGE_NUM) == ADV_BOX_SCORE) {
+			if(getAdvBoxView(0) != null) { 
+				unbindBitmap(getAdvBoxView(0).findViewById(R.id.box_away_team_logo));
+			}
+			if(getAdvBoxView(1) != null) {
+				unbindBitmap(getAdvBoxView(1).findViewById(R.id.box_home_team_logo));
+			}
+		}
+		myAdvBoxFragments.clear();
+		myAdvBoxViews.clear();
+		myBoxFragments.clear();
+		myBoxViews.clear();
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		Log.d(TAG, "ArchivedGameFragment : onSaveInstance");
-		
+
 		Bundle args = getArguments();
 		AdvancedBoxScoreFragment awayBox;
 		AdvancedBoxScoreFragment homeBox;
 		AdvancedBoxScoreFragment awayAdvBox;
 		AdvancedBoxScoreFragment homeAdvBox;
-		
+
 		if(args.getInt(PAGE_NUM) == BOX_SCORE) {
 			awayBox = (AdvancedBoxScoreFragment) getBoxFrag(0);
 			homeBox = (AdvancedBoxScoreFragment) getBoxFrag(1);
@@ -208,7 +252,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			break;
 		}
 	}
-	
+
 	private void toggleSelected(View v) {
 		View otherButton;
 		switch(v.getId()) {
@@ -237,9 +281,9 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			break;
 		}
 	}
-	
+
 	private void connectTeamButtons(View myView, boolean adv) {
-		
+
 		// Advanced or Box Buttons
 		View away_button;
 		View home_button;
@@ -253,49 +297,53 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 		away_button.setOnClickListener(this);
 		home_button.setOnClickListener(this);
 	}
-	
+
 	@Override
 	public void createAdvBoxScoreFrag(ViewGroup view, boolean home) {
-		
-		Log.d(TAG, "ArchivedGameFragment : createAdvBoxScoreFrag : home = " + home);
-		
-		// Create AdvancedBoxScoreFragments for home and away teams
-		AdvancedBoxScoreFragment AdvBoxScoreFrag;
-		if(myAdvBoxFragments.size() < 2) {
-			if(home) {
-				AdvBoxScoreFrag = AdvancedBoxScoreFragment.newInstance(1, true);
-			} else {
-				AdvBoxScoreFrag = AdvancedBoxScoreFragment.newInstance(0, true);
+
+		if(!destroyed) {
+			Log.d(TAG, "ArchivedGameFragment : createAdvBoxScoreFrag : home = " + home);
+
+			// Create AdvancedBoxScoreFragments for home and away teams
+			AdvancedBoxScoreFragment AdvBoxScoreFrag;
+			if(myAdvBoxFragments.size() < 2) {
+				if(home) {
+					AdvBoxScoreFrag = AdvancedBoxScoreFragment.newInstance(1, true);
+				} else {
+					AdvBoxScoreFrag = AdvancedBoxScoreFragment.newInstance(0, true);
+				}
+				myAdvBoxFragments.add(AdvBoxScoreFrag);
 			}
-			myAdvBoxFragments.add(AdvBoxScoreFrag);
+
+			// Add the View and the Fragment to the vectors for storage
+			myAdvBoxViews.add(view);
 		}
-		
-		// Add the View and the Fragment to the vectors for storage
-		myAdvBoxViews.add(view);
 	}
-	
+
 	@Override
 	public void createBoxScoreFrag(ViewGroup view, boolean home) {
-		
-		Log.d(TAG, "ArchivedGameFragment : createBoxScoreFrag : home = " + home);
-		
-		// Create BoxScoreFragments for home and away teams
-		AdvancedBoxScoreFragment BoxScoreFrag;
-		if(myBoxFragments.size() < 2) {
-			if(home) {
-				BoxScoreFrag = AdvancedBoxScoreFragment.newInstance(1, false);
-			} else {
-				BoxScoreFrag = AdvancedBoxScoreFragment.newInstance(0, false);
+
+		if(!destroyed) {
+			Log.d(TAG, "ArchivedGameFragment : createBoxScoreFrag : home = " + home);
+
+			// Create BoxScoreFragments for home and away teams
+			AdvancedBoxScoreFragment BoxScoreFrag;
+			if(myBoxFragments.size() < 2) {
+				if(home) {
+					BoxScoreFrag = AdvancedBoxScoreFragment.newInstance(1, false);
+				} else {
+					BoxScoreFrag = AdvancedBoxScoreFragment.newInstance(0, false);
+				}
+				myBoxFragments.add(BoxScoreFrag);
 			}
-			myBoxFragments.add(BoxScoreFrag);
+
+			// Add the View and the Fragment to the vectors for storage
+			myBoxViews.add(view);
 		}
-		
-		// Add the View and the Fragment to the vectors for storage
-		myBoxViews.add(view);
 	}
-	
+
 	private void loadAdvBoxFrag(boolean home) {
-		
+
 		Log.d(TAG, "ArchivedGameFragment : loadAdvBoxFrag for home = " + home);
 		AdvancedBoxScoreFragment AdvBoxScoreFrag = (AdvancedBoxScoreFragment) getAdvBoxFrag(home ? 1 : 0);
 		if(AdvBoxScoreFrag != null) {
@@ -314,7 +362,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			activeBox = (home) ? 1 : 0;
 		}
 	}
-	
+
 	private void loadBoxFrag(boolean home) {
 
 		Log.d(TAG, "ArchivedGameFragment : loadBoxFrag for home = " + home);
@@ -335,7 +383,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			activeBox = (home) ? 1 : 0;
 		}
 	}
-	
+
 	private void switchAdvBoxScoreFrag(Fragment myFrag, boolean home) {
 		if(myFrag.isVisible()) {
 			Log.d(TAG, "ArchivedGameFragment : switchAdvBoxScoreFrag : Fragment already visible so doing nothing...");
@@ -350,7 +398,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			activeBox = (home) ? 1 : 0;
 		}
 	}
-	
+
 	private void switchBoxScoreFrag(Fragment myFrag, boolean home) {
 		if(myFrag.isVisible()) {
 			Log.d(TAG, "ArchivedGameFragment : switchBoxScoreFrag : Fragment already visible so doing nothing...");
@@ -365,7 +413,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			activeBox = (home) ? 1 : 0;
 		}
 	}
-	
+
 	private Fragment getAdvBoxFrag(int index) { 
 		try {
 			return myAdvBoxFragments.get(index);
@@ -374,7 +422,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			return null;
 		}
 	}
-	
+
 	ViewGroup getAdvBoxView(int index) {
 		try {
 			return myAdvBoxViews.get(index);
@@ -383,7 +431,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			return null;
 		}
 	}
-	
+
 	private Fragment getBoxFrag(int index) { 
 		try {
 			return myBoxFragments.get(index);
@@ -392,7 +440,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			return null;
 		}
 	}
-	
+
 	ViewGroup getBoxView(int index) {
 		try {
 			return myBoxViews.get(index);
@@ -401,13 +449,13 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			return null;
 		}
 	}
-	
+
 	@Override
 	public void loadImages(BasketballGame myGame) {
-		
+
 		Bundle args = getArguments();
 		int page_num = args.getInt(PAGE_NUM);
-		
+
 		if(!destroyed) {
 			Log.d(TAG, "ArchivedGameFragment : loadImages : Calling the update functions!");
 			if(page_num == FOUR_FACTORS) {
@@ -427,9 +475,9 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			Log.d(TAG, "ArchivedGameFragment has been destroyed, skipping update functions!");
 		}
 	}
-	
+
 	public void update4Factors(BasketballGame myGame) {
-		
+
 		// Update the view with the data in the BasketballGame object
 		ViewGroup myView = (ViewGroup) getView();
 		if(myView != null) {
@@ -437,11 +485,12 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			Bundle args = getArguments();
 			//updateTask.execute(args.getInt(PAGE_NUM));
 			updateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args.getInt(PAGE_NUM));
+			factorsUpdateTask = updateTask;
 		}
 	}
-	
+
 	public void updateBox(BasketballGame myGame) {
-		
+
 		ViewGroup myView = (ViewGroup) getView();
 		if(myView != null) {
 			// Update the view with the data in the BasketballGame object
@@ -449,6 +498,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			Bundle args = getArguments();
 			//updateTask.execute(args.getInt(PAGE_NUM));
 			updateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args.getInt(PAGE_NUM));
+			boxUpdateTask = updateTask;
 		}
 	}
 
@@ -461,9 +511,10 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 			Bundle args = getArguments();
 			//updateTask.execute(args.getInt(PAGE_NUM));
 			updateTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args.getInt(PAGE_NUM));
+			advBoxUpdateTask = updateTask;
 		}
 	}
-	
+
 	public void updateShotChart(BasketballGame myGame) {
 		// Update the view with the data in the BasketballGame object
 		Bundle args = getArguments();
@@ -471,7 +522,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 		TextView tmpText = (TextView)getView().findViewById(R.id.shotchart_test);
 		tmpText.setText("Updating this page");
 	}
-	
+
 	//
 	// Function used by the AdvancedBoxScore Page to update the button text, color, image
 	//
@@ -487,7 +538,7 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 		StateListDrawable awayList = new StateListDrawable();
 		awayList.addState(new int[] { android.R.attr.state_selected }, new ColorDrawable(getResources().getColor(R.color.GRAY)));
 		awayButton.setBackgroundDrawable(awayList);
-		
+
 		// Set the Home Team Button
 		RelativeLayout homeButton;
 		if(adv) {
@@ -499,15 +550,18 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 		StateListDrawable homeList = new StateListDrawable();
 		homeList.addState(new int[] { android.R.attr.state_selected }, new ColorDrawable(getResources().getColor(R.color.GRAY)));
 		homeButton.setBackgroundDrawable(homeList);
-		
+
 		if(activeBox == 0) {
 			awayButton.setSelected(true);
 		} else {
 			homeButton.setSelected(true);
 		}
 	}
-	
+
 	private void load4FactorsImages(BasketballGame myGame) {
+
+		factorsUpdateTask = null;
+
 		// Set the Image size
 		int pixels = NBAStatStream.dpToPx(120.0f);
 
@@ -521,35 +575,55 @@ public class ArchivedGameFragment extends Fragment implements OnClickListener, B
 		int homeLogo = ((NBATeamInfo) getActivity().getApplicationContext()).getTeamLogo(myGame.HomeTeam.getFullName());
 		loadBitmap(homeLogo, homeImageView, pixels, pixels, false);
 	}
-	
+
 	private void loadBoxImages(BasketballGame myGame, boolean adv) {
-		
+
 		Log.d(TAG, "inside loadBoxImages...for PAGE_NUM = " + getArguments().getInt(PAGE_NUM));
-		
+
 		int pixels = NBAStatStream.dpToPx(50.0f);
 		ImageView homeImageView;
 		ImageView awayImageView;
-		
+
 		if(adv) {
 			awayImageView = (ImageView) getView().findViewById(R.id.adv_box_away_team_logo);
 			homeImageView = (ImageView) getView().findViewById(R.id.adv_box_home_team_logo);
+			advBoxUpdateTask = null;
 		} else {
 			awayImageView = (ImageView) getView().findViewById(R.id.box_away_team_logo);
 			homeImageView = (ImageView) getView().findViewById(R.id.box_home_team_logo);
+			boxUpdateTask = null;
 		}
-		
+
 		// Get the Away Button ImageView and resource ID
 		int awayLogo = ((NBATeamInfo) getActivity().getApplicationContext()).getTeamLogo(myGame.AwayTeam.getFullName());
 		loadBitmap(awayLogo, awayImageView, pixels, pixels, false);
-		
+
 		// Get the Home Button ImageView and resource ID
 		int homeLogo = ((NBATeamInfo) getActivity().getApplicationContext()).getTeamLogo(myGame.HomeTeam.getFullName());
 		loadBitmap(homeLogo, homeImageView, pixels, pixels, true);
 	}
-	
+
 	private void loadBitmap(int resId, ImageView imageView, int width, int height, boolean last) {
 		BitmapWorkerTask task = new BitmapWorkerTask(getActivity(), imageView, last);
 		//task.execute(resId, width, height);
 		task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resId, width, height);
+		bitmapTasks.add(task);
+	}
+
+	private void cancelBitmapTasks() {
+		for(int i=0; i < bitmapTasks.size(); i++) {
+			BitmapWorkerTask task = bitmapTasks.get(i);
+			if(task != null) {
+				task.cancel(true);
+			}
+		}
+		bitmapTasks.clear();
+	}
+
+	private void unbindBitmap(View view) {
+		if(view != null) {
+			Log.d(TAG, "ArchivedGameFragment : unbindBitmap : removing Bitmap from view = " + view.getId());
+			((ImageView) view).setImageBitmap(null);
+		}
 	}
 }
