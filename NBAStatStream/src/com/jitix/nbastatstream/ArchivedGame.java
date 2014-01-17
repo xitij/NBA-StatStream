@@ -158,6 +158,8 @@ public class ArchivedGame extends FragmentActivity implements TaskListener {
 	protected void onDestroy() {
 		super.onDestroy();
 		Log.d(TAG,  "ArchivedGame onDestroy() called!");
+		archivedGamePagerAdapter = null;
+		viewPager = null;
 	}
 
 
