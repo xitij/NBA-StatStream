@@ -18,3 +18,141 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-dontobfuscate
+-injars bin/classes
+-injars libs
+-outjars bin/classes-processed.jar
+
+-libraryjars /Users/tlourchane/Development/adt-bundle-mac-x86_64-20130717/sdk/platforms/android-19/android.jar
+-libraryjars libs/android-support-v4.jar
+-libraryjars libs/jackson-annotations-2.2.3.jar
+-libraryjars libs/jackson-core-2.2.3.jar
+-libraryjars libs/jackson-databind-2.2.3.jar
+
+# Keep a fixed source file attribute and all line number tables to get line
+# numbers in the stack traces.
+# You can comment this out if you're not interested in stack traces.
+
+-renamesourcefileattribute SourceFile
+-keepattributes SourceFile,LineNumberTable
+
+# Preserve all fundamental application classes.
+
+-keep public class * extends android.support.v4.app.FragmentActivity
+-keep public class * extends android.support.v4.app.Fragment
+-keep public class * extends android.app.Activity
+-keep public class * extends android.app.Service
+-keep public class * extends android.app.BroadcastReceiver
+-keep public class * extends android.app.ContentProvider
+-keep public class * extends android.app.Application
+
+-keep public class com.jitix.nbastatstream.ArchivedGamePagerAdapter 
+-keep public class com.jitix.nbastatstream.BasketballGame
+-keep public class com.jitix.nbastatstream.BitmapWorkerTask
+-keep public class com.jitix.nbastatstream.CalendarUpdateTask
+-keep public class com.jitix.nbastatstream.DatePickerDialogFragment
+-keep public class com.jitix.nbastatstream.GameDownloader
+-keep public class com.jitix.nbastatstream.GameFragmentUpdateTask
+-keep public interface com.jitix.nbastatstream.BoxListener
+-keep public interface com.jitix.nbastatstream.TaskListener
+
+-keep public class com.jitix.nbastatstream.util.Base64
+-keep public class com.jitix.nbastatstream.util.Base64DecoderException
+-keep public class com.jitix.nbastatstream.util.IabException
+-keep public class com.jitix.nbastatstream.util.IabHelper
+-keep public class com.jitix.nbastatstream.util.IabResult
+-keep public class com.jitix.nbastatstream.util.Inventory
+-keep public class com.jitix.nbastatstream.util.Purchase
+-keep public class com.jitix.nbastatstream.util.Security
+-keep public class com.jitix.nbastatstream.util.SkuDetails
+-keep class com.android.vending.billing.**
+
+
+# Preserve all View implementations, their special context constructors, and
+# their setters.
+
+-keep public class * extends android.view.View {
+  public <init>(android.content.Context);
+  public <init>(android.content.Context, android.util.AttributeSet);
+  public <init>(android.content.Context, android.util.AttributeSet, int);
+  public void set*(...);
+}
+
+# Preserve all classes that have special context constructors, and the
+# constructors themselves.
+
+-keepclasseswithmember class * {
+  public <init>(android.content.Context, android.util.AttributeSets);
+}
+
+# Preserve all classes that have special context constructors, and the
+# constructors themselves.
+
+-keepclasseswithmember class * {
+  public <init>(android.content.Context, android.util.AttributeSets, int);
+}
+
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int i(...);
+    public static int w(...);
+    public static int d(...);
+    public static int e(...);
+}
+
+-dontskipnonpubliclibraryclassmembers
+
+-keepattributes *Annotation*,EnclosingMethod
+
+-keepnames class org.codehaus.jackson.** { *; }
+
+-dontwarn javax.xml.**
+-dontwarn javax.xml.stream.events.**
+-dontwarn com.fasterxml.jackson.databind.**
+
+-keep public class Events.** {
+  public void set*(***);
+  public *** get*();
+}
+
+-keep public class Event.** {
+  public void set*(***);
+  public *** get*();
+}
+
+-keep public class BoxScoreLine.** {
+  public void set*(***);
+  public *** get*();
+}
+
+-keep public class Official.** {
+  public void set*(***);
+  public *** get*();
+}
+
+-keep public class Player.** {
+  public void set*(***);
+  public *** get*();
+}
+
+-keep public class Site.** {
+  public void set*(***);
+  public *** get*();
+}
+
+-keep public class Team.** {
+  public void set*(***);
+  public *** get*();
+}
+
+-keep public class BasketballGame.** {
+  public void set*(***);
+  public *** get*();
+}
+
+-keep public class AdvancedBoxScoreLine.** {
+  public void set*(***);
+  public *** get*();
+}
